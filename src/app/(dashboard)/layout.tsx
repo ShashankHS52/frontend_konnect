@@ -6,16 +6,13 @@ import type { ReactNode } from "react";
 import {
   Home,
   Briefcase,
-  FileText,
-  BarChart2,
   Settings,
   LogOut,
   Bell,
   Search,
-  User,
-  Shield,
   FileKey,
   History,
+  Shield,
 } from "lucide-react";
 
 import {
@@ -92,7 +89,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                   >
                     <item.icon />
                     <span>{item.label}</span>
-                    {item.badge && <Badge variant="destructive" className="ml-auto">{item.badge}</Badge>}
                   </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>

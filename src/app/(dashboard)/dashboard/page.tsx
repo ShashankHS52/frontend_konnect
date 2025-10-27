@@ -1,107 +1,117 @@
 "use client";
 
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Briefcase, FileText, School, History } from 'lucide-react';
-import { collegeStats, organizationStats, auditLogs as recentActivities } from '@/lib/placeholder-data';
-import { Area, AreaChart as RechartsAreaChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Progress } from '@/components/ui/progress';
+import { AreaChart, BarChart, PieChart, LineChart } from 'lucide-react';
+import Image from 'next/image';
+import { Area, AreaChart as RechartsAreaChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { collegeStats, organizationStats, auditLogs as recentActivities } from '@/lib/placeholder-data';
+import { useEffect, useState } from 'react';
+
+const projectStatsData = [
+  { name: 'Total Students', value: 850, total: 1000, color: 'bg-blue-500', icon: AreaChart },
+  { name: 'Applied Students', value: 650, total: 1000, color: 'bg-green-500', icon: BarChart },
+  { name: 'Selected Students', value: 350, total: 1000, color: 'bg-yellow-500', icon: PieChart },
+  { name: 'Pending Applications', value: 300, total: 1000, color: 'bg-red-500', icon: LineChart },
+];
 
 export default function DashboardPage() {
-  const totalColleges = Object.keys(collegeStats).length;
-  const totalOrgs = Object.keys(organizationStats).length;
-  const totalStudents = Object.values(collegeStats).flat().reduce((acc, curr) => acc + curr.students, 0);
-  const totalJobs = Object.values(organizationStats).flat().reduce((acc, curr) => acc + curr.postings, 0);
+    const totalColleges = Object.keys(collegeStats).length;
+    const totalOrgs = Object.keys(organizationStats).length;
+    const totalStudents = Object.values(collegeStats).flat().reduce((acc, curr) => acc + curr.students, 0);
+    const totalJobs = Object.values(organizationStats).flat().reduce((acc, curr) => acc + curr.postings, 0);
 
-  const collegeData = [
-    { year: '2021', Greenwood: 450, Oakridge: 300, Pinecrest: 150, Mapleleaf: 0 },
-    { year: '2022', Greenwood: 620, Oakridge: 410, Pinecrest: 250, Mapleleaf: 200 },
-    { year: '2023', Greenwood: 850, Oakridge: 550, Pinecrest: 350, Mapleleaf: 450 },
-    { year: '2024', Greenwood: 980, Oakridge: 630, Pinecrest: 450, Mapleleaf: 700 },
-  ];
-  
-  const orgData = [
-    { year: '2022', Innovate: 15, Tech: 0, Future: 0, Quantum: 0 },
-    { year: '2023', Innovate: 25, Tech: 5, Future: 30, Quantum: 0 },
-    { year: '2024', Innovate: 40, Tech: 12, Future: 55, Quantum: 22 },
-  ];
+    const [activityLogs, setActivityLogs] = useState<any[]>([]);
 
-  const collegeChartConfig: ChartConfig = {
-    Greenwood: { label: "Greenwood", color: "hsl(var(--chart-1))" },
-    Oakridge: { label: "Oakridge", color: "hsl(var(--chart-2))" },
-    Pinecrest: { label: "Pinecrest", color: "hsl(var(--chart-3))" },
-    Mapleleaf: { label: "Mapleleaf", color: "hsl(var(--chart-4))" },
-  } satisfies ChartConfig;
+    useEffect(() => {
+        const getRelativeTime = (timestamp: string) => {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-  const orgChartConfig: ChartConfig = {
-    Innovate: { label: "Innovate Inc.", color: "hsl(var(--chart-1))" },
-    Tech: { label: "Tech Solutions", color: "hsl(var(--chart-2))" },
-    Future: { label: "Future Forward", color: "hsl(var(--chart-3))" },
-    Quantum: { label: "QuantumLeap", color: "hsl(var(--chart-4))" },
-  } satisfies ChartConfig;
+            if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
+            const diffInMinutes = Math.floor(diffInSeconds / 60);
+            if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+            const diffInHours = Math.floor(diffInMinutes / 60);
+            if (diffInHours < 24) return `${diffInHours}h ago`;
+            const diffInDays = Math.floor(diffInHours / 24);
+            return `${diffInDays}d ago`;
+        };
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-  }
+        const processedActivities = recentActivities.slice(0, 5).map(activity => ({
+            ...activity,
+            relativeTime: getRelativeTime(activity.timestamp)
+        }));
+        setActivityLogs(processedActivities);
+    }, []);
 
-  const getRelativeTime = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    const collegeData = [
+        { year: '2021', Greenwood: 450, Oakridge: 300, Pinecrest: 150, Mapleleaf: 0 },
+        { year: '2022', Greenwood: 620, Oakridge: 410, Pinecrest: 250, Mapleleaf: 200 },
+        { year: '2023', Greenwood: 850, Oakridge: 550, Pinecrest: 350, Mapleleaf: 450 },
+        { year: '2024', Greenwood: 980, Oakridge: 630, Pinecrest: 450, Mapleleaf: 700 },
+    ];
+    
+    const orgData = [
+        { year: '2022', Innovate: 15, Tech: 0, Future: 0, Quantum: 0 },
+        { year: '2023', Innovate: 25, Tech: 5, Future: 30, Quantum: 0 },
+        { year: '2024', Innovate: 40, Tech: 12, Future: 55, Quantum: 22 },
+    ];
 
-    if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d ago`;
-};
+    const collegeChartConfig: ChartConfig = {
+        Greenwood: { label: "Greenwood", color: "hsl(var(--chart-1))" },
+        Oakridge: { label: "Oakridge", color: "hsl(var(--chart-2))" },
+        Pinecrest: { label: "Pinecrest", color: "hsl(var(--chart-3))" },
+        Mapleleaf: { label: "Mapleleaf", color: "hsl(var(--chart-4))" },
+    } satisfies ChartConfig;
 
+    const orgChartConfig: ChartConfig = {
+        Innovate: { label: "Innovate Inc.", color: "hsl(var(--chart-1))" },
+        Tech: { label: "Tech Solutions", color: "hsl(var(--chart-2))" },
+        Future: { label: "Future Forward", color: "hsl(var(--chart-3))" },
+        Quantum: { label: "QuantumLeap", color: "hsl(var(--chart-4))" },
+    } satisfies ChartConfig;
+
+    const getInitials = (name: string) => {
+        return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    }
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Colleges</CardTitle>
-            <School className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Colleges</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalColleges}</div>
-            <p className="text-xs text-muted-foreground">Managed colleges & universities</p>
+            <div className="text-3xl font-bold">{totalColleges}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Organizations</CardTitle>
-            <Briefcase className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Organizations</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalOrgs}</div>
-            <p className="text-xs text-muted-foreground">Managed organizations</p>
+            <div className="text-3xl font-bold">{totalOrgs}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Students</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalStudents}</div>
-            <p className="text-xs text-muted-foreground">Registered across all colleges</p>
+            <div className="text-3xl font-bold">{totalStudents}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Job Postings</CardTitle>
-            <Briefcase className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Jobs</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalJobs}</div>
-            <p className="text-xs text-muted-foreground">Across all organizations</p>
+            <div className="text-3xl font-bold">{totalJobs}</div>
           </CardContent>
         </Card>
       </div>
@@ -111,19 +121,23 @@ export default function DashboardPage() {
             <Tabs defaultValue="colleges">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Platform Statistics</CardTitle>
-                        <CardDescription>
-                            An overview of registrations and postings on the platform.
-                        </CardDescription>
-                         <TabsList className="grid w-full grid-cols-2 mt-4">
-                            <TabsTrigger value="colleges">Colleges</TabsTrigger>
-                            <TabsTrigger value="organizations">Organizations</TabsTrigger>
-                        </TabsList>
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <CardTitle>Platform Statistics</CardTitle>
+                                <CardDescription>
+                                    An overview of registrations and postings on the platform.
+                                </CardDescription>
+                            </div>
+                            <TabsList className="grid w-full max-w-[250px] grid-cols-2">
+                                <TabsTrigger value="colleges">Colleges</TabsTrigger>
+                                <TabsTrigger value="organizations">Organizations</TabsTrigger>
+                            </TabsList>
+                        </div>
                     </CardHeader>
                     <CardContent>
                         <TabsContent value="colleges">
-                            <ChartContainer config={collegeChartConfig} className="min-h-[200px] w-full">
-                                <RechartsAreaChart accessibilityLayer data={collegeData}>
+                            <ChartContainer config={collegeChartConfig} className="min-h-[250px] w-full">
+                                <RechartsAreaChart accessibilityLayer data={collegeData} margin={{ left: -20, right: 10 }}>
                                     <CartesianGrid vertical={false} />
                                     <XAxis
                                         dataKey="year"
@@ -131,6 +145,7 @@ export default function DashboardPage() {
                                         axisLine={false}
                                         tickMargin={8}
                                     />
+                                    <YAxis tickLine={false} axisLine={false} tickMargin={8} />
                                     <ChartTooltip
                                         cursor={false}
                                         content={<ChartTooltipContent indicator="dot" />}
@@ -143,8 +158,8 @@ export default function DashboardPage() {
                             </ChartContainer>
                         </TabsContent>
                         <TabsContent value="organizations">
-                           <ChartContainer config={orgChartConfig} className="min-h-[200px] w-full">
-                                <RechartsAreaChart accessibilityLayer data={orgData}>
+                           <ChartContainer config={orgChartConfig} className="min-h-[250px] w-full">
+                                <RechartsAreaChart accessibilityLayer data={orgData} margin={{ left: -20, right: 10 }}>
                                     <CartesianGrid vertical={false} />
                                     <XAxis
                                         dataKey="year"
@@ -152,6 +167,7 @@ export default function DashboardPage() {
                                         axisLine={false}
                                         tickMargin={8}
                                     />
+                                    <YAxis tickLine={false} axisLine={false} tickMargin={8} />
                                     <ChartTooltip
                                         cursor={false}
                                         content={<ChartTooltipContent indicator="dot" />}
@@ -173,7 +189,7 @@ export default function DashboardPage() {
             <CardDescription>A log of recent important actions in the system.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {recentActivities.slice(0, 5).map(activity => (
+            {activityLogs.length > 0 ? activityLogs.map(activity => (
                 <div key={activity.id} className="flex items-start gap-4">
                     <Avatar className="h-9 w-9 border">
                         <AvatarFallback>{getInitials(activity.entity)}</AvatarFallback>
@@ -185,11 +201,11 @@ export default function DashboardPage() {
                         <p className="text-sm text-muted-foreground">
                             <span className="font-semibold">{activity.entity}</span>
                             <span className="mx-1">&middot;</span>
-                            {getRelativeTime(activity.timestamp)}
+                            {activity.relativeTime}
                         </p>
                     </div>
                 </div>
-            ))}
+            )) : <p className="text-sm text-muted-foreground">Loading activities...</p>}
           </CardContent>
         </Card>
       </div>
