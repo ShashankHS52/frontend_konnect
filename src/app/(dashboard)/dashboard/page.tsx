@@ -1,11 +1,11 @@
-
 "use client";
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Briefcase, FileText, School, History } from 'lucide-react';
 import { collegeStats, organizationStats, auditLogs as recentActivities } from '@/lib/placeholder-data';
-import { Bar, BarChart as RechartsBarChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Area, AreaChart as RechartsAreaChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -15,16 +15,33 @@ export default function DashboardPage() {
   const totalStudents = Object.values(collegeStats).flat().reduce((acc, curr) => acc + curr.students, 0);
   const totalJobs = Object.values(organizationStats).flat().reduce((acc, curr) => acc + curr.postings, 0);
 
-  const collegeData = Object.entries(collegeStats).map(([name, data]) => ({
-    name: name.split(' ').slice(0, 2).join(' '),
-    students: data.reduce((acc, curr) => acc + curr.students, 0)
-  }));
-
-  const orgData = Object.entries(organizationStats).map(([name, data]) => ({
-    name: name.split(' ').slice(0, 2).join(' '),
-    postings: data.reduce((acc, curr) => acc + curr.postings, 0)
-  }));
+  const collegeData = [
+    { year: '2021', Greenwood: 450, Oakridge: 300, Pinecrest: 150, Mapleleaf: 0 },
+    { year: '2022', Greenwood: 620, Oakridge: 410, Pinecrest: 250, Mapleleaf: 200 },
+    { year: '2023', Greenwood: 850, Oakridge: 550, Pinecrest: 350, Mapleleaf: 450 },
+    { year: '2024', Greenwood: 980, Oakridge: 630, Pinecrest: 450, Mapleleaf: 700 },
+  ];
   
+  const orgData = [
+    { year: '2022', Innovate: 15, Tech: 0, Future: 0, Quantum: 0 },
+    { year: '2023', Innovate: 25, Tech: 5, Future: 30, Quantum: 0 },
+    { year: '2024', Innovate: 40, Tech: 12, Future: 55, Quantum: 22 },
+  ];
+
+  const collegeChartConfig: ChartConfig = {
+    Greenwood: { label: "Greenwood", color: "hsl(var(--chart-1))" },
+    Oakridge: { label: "Oakridge", color: "hsl(var(--chart-2))" },
+    Pinecrest: { label: "Pinecrest", color: "hsl(var(--chart-3))" },
+    Mapleleaf: { label: "Mapleleaf", color: "hsl(var(--chart-4))" },
+  } satisfies ChartConfig;
+
+  const orgChartConfig: ChartConfig = {
+    Innovate: { label: "Innovate Inc.", color: "hsl(var(--chart-1))" },
+    Tech: { label: "Tech Solutions", color: "hsl(var(--chart-2))" },
+    Future: { label: "Future Forward", color: "hsl(var(--chart-3))" },
+    Quantum: { label: "QuantumLeap", color: "hsl(var(--chart-4))" },
+  } satisfies ChartConfig;
+
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   }
@@ -105,28 +122,46 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <TabsContent value="colleges">
-                            <ResponsiveContainer width="100%" height={300}>
-                                <RechartsBarChart data={collegeData}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} interval={0} />
-                                    <YAxis />
-                                    <RechartsTooltip />
-                                    <Legend wrapperStyle={{paddingTop: 40}} />
-                                    <Bar dataKey="students" fill="hsl(var(--primary))" name="Total Students" />
-                                </RechartsBarChart>
-                            </ResponsiveContainer>
+                            <ChartContainer config={collegeChartConfig} className="min-h-[200px] w-full">
+                                <RechartsAreaChart accessibilityLayer data={collegeData}>
+                                    <CartesianGrid vertical={false} />
+                                    <XAxis
+                                        dataKey="year"
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tickMargin={8}
+                                    />
+                                    <ChartTooltip
+                                        cursor={false}
+                                        content={<ChartTooltipContent indicator="dot" />}
+                                    />
+                                    <Area dataKey="Greenwood" type="natural" fill="var(--color-Greenwood)" fillOpacity={0.4} stroke="var(--color-Greenwood)" stackId="a" />
+                                    <Area dataKey="Oakridge" type="natural" fill="var(--color-Oakridge)" fillOpacity={0.4} stroke="var(--color-Oakridge)" stackId="a" />
+                                    <Area dataKey="Pinecrest" type="natural" fill="var(--color-Pinecrest)" fillOpacity={0.4} stroke="var(--color-Pinecrest)" stackId="a" />
+                                    <Area dataKey="Mapleleaf" type="natural" fill="var(--color-Mapleleaf)" fillOpacity={0.4} stroke="var(--color-Mapleleaf)" stackId="a" />
+                                </RechartsAreaChart>
+                            </ChartContainer>
                         </TabsContent>
                         <TabsContent value="organizations">
-                            <ResponsiveContainer width="100%" height={300}>
-                                <RechartsBarChart data={orgData}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} interval={0} />
-                                    <YAxis />
-                                    <RechartsTooltip />
-                                    <Legend wrapperStyle={{paddingTop: 40}} />
-                                    <Bar dataKey="postings" fill="hsl(var(--accent))" name="Total Postings" />
-                                </RechartsBarChart>
-                            </ResponsiveContainer>
+                           <ChartContainer config={orgChartConfig} className="min-h-[200px] w-full">
+                                <RechartsAreaChart accessibilityLayer data={orgData}>
+                                    <CartesianGrid vertical={false} />
+                                    <XAxis
+                                        dataKey="year"
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tickMargin={8}
+                                    />
+                                    <ChartTooltip
+                                        cursor={false}
+                                        content={<ChartTooltipContent indicator="dot" />}
+                                    />
+                                    <Area dataKey="Innovate" type="natural" fill="var(--color-Innovate)" fillOpacity={0.4} stroke="var(--color-Innovate)" stackId="a" />
+                                    <Area dataKey="Tech" type="natural" fill="var(--color-Tech)" fillOpacity={0.4} stroke="var(--color-Tech)" stackId="a" />
+                                    <Area dataKey="Future" type="natural" fill="var(--color-Future)" fillOpacity={0.4} stroke="var(--color-Future)" stackId="a" />
+                                    <Area dataKey="Quantum" type="natural" fill="var(--color-Quantum)" fillOpacity={0.4} stroke="var(--color-Quantum)" stackId="a" />
+                                </RechartsAreaChart>
+                            </ChartContainer>
                         </TabsContent>
                     </CardContent>
                 </Card>
@@ -161,5 +196,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
