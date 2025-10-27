@@ -121,7 +121,7 @@ export default function DashboardLayout({ children }) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="w-full justify-start gap-2 p-2 h-auto">
-                    <Image src="https://i.pravatar.cc/150?u=superadmin" alt="user avatar" width={40} height={40} className="rounded-full" />
+                    <Image src="https://picsum.photos/seed/2/40/40" alt="user avatar" width={40} height={40} className="rounded-full" data-ai-hint="profile avatar" />
                     <div className="text-left group-data-[collapsible=icon]:hidden">
                         <p className="font-medium text-sm">Super Admin</p>
                         <p className="text-xs text-sidebar-foreground/70">admin@super.app</p>
@@ -168,7 +168,7 @@ export default function DashboardLayout({ children }) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
-                    <Image src="https://i.pravatar.cc/150?u=superadmin" alt="user avatar" width={32} height={32} className="rounded-full" />
+                    <Image src="https://picsum.photos/seed/2/32/32" alt="user avatar" width={32} height={32} className="rounded-full" data-ai-hint="profile avatar" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
