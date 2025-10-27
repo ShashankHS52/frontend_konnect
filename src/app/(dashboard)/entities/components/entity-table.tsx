@@ -36,6 +36,14 @@ const StatusBadge = ({ status }: { status: Entity['status'] }) => (
 export function EntityTable() {
     const [entityList, setEntityList] = useState<Entity[]>(entities);
 
+    const getLocalDateString = (dateString: string) => {
+        try {
+            return new Date(dateString).toLocaleDateString();
+        } catch {
+            return dateString;
+        }
+    }
+
     return (
         <div className="w-full rounded-md border">
             <Table>
@@ -55,8 +63,8 @@ export function EntityTable() {
                     <TableCell className="font-medium">{entity.name}</TableCell>
                     <TableCell>{entity.type}</TableCell>
                     <TableCell><StatusBadge status={entity.status} /></TableCell>
-                    <TableCell>{new Date(entity.registeredOn).toLocaleDateString()}</TableCell>
-                    <TableCell>{new Date(entity.linkExpiry).toLocaleDateString()}</TableCell>
+                    <TableCell>{getLocalDateString(entity.registeredOn)}</TableCell>
+                    <TableCell>{getLocalDateString(entity.linkExpiry)}</TableCell>
                     <TableCell>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>

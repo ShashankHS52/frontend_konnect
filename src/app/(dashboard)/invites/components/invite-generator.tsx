@@ -78,6 +78,14 @@ export function InviteGenerator() {
     });
   };
 
+  const getLocalDateString = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString();
+    } catch {
+      return dateString;
+    }
+  }
+
   return (
     <div className="space-y-6">
         <Dialog onOpenChange={(open) => { if(!open) { setNewLink(''); setNewlyGeneratedInvite(null); }}}>
@@ -141,7 +149,7 @@ export function InviteGenerator() {
                             <TableCell>
                                 <StatusBadge status={invite.status} />
                             </TableCell>
-                            <TableCell>{new Date(invite.expiresAt).toLocaleDateString()}</TableCell>
+                            <TableCell>{getLocalDateString(invite.expiresAt)}</TableCell>
                             <TableCell>
                                 <Button variant="ghost" size="sm" onClick={() => {
                                     navigator.clipboard.writeText(invite.link);

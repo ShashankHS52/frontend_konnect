@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Table,
   TableBody,
@@ -10,6 +12,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { auditLogs } from '@/lib/placeholder-data';
 
 export default function AuditLogsPage() {
+    const getLocalDateTimeString = (dateString: string) => {
+        try {
+            return new Date(dateString).toLocaleString();
+        } catch {
+            return dateString;
+        }
+    }
+
     return (
         <Card>
             <CardHeader>
@@ -31,7 +41,7 @@ export default function AuditLogsPage() {
                         <TableBody>
                             {auditLogs.map((log) => (
                                 <TableRow key={log.id}>
-                                    <TableCell>{new Date(log.timestamp).toLocaleString()}</TableCell>
+                                    <TableCell>{getLocalDateTimeString(log.timestamp)}</TableCell>
                                     <TableCell className="font-medium">{log.entity}</TableCell>
                                     <TableCell>{log.action}</TableCell>
                                     <TableCell>{log.user}</TableCell>

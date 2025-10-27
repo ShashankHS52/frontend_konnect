@@ -1,23 +1,32 @@
+"use client";
+
 import { EntityTable } from './components/entity-table';
 import { entities } from '@/lib/placeholder-data';
 import { subDays, isBefore, parseISO } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function EntitiesPage() {
-  const now = new Date();
-  const thirtyDaysFromNow = subDays(now, -30);
+  const [expiringSoon, setExpiringSoon] = useState<typeof entities>([]);
 
-  const expiringSoon = entities
-    .filter(e => {
-        try {
-            const expiryDate = parseISO(e.linkExpiry);
-            return isBefore(expiryDate, thirtyDaysFromNow) && isBefore(now, expiryDate);
-        } catch {
-            return false;
-        }
-    })
-    .sort((a, b) => parseISO(a.linkExpiry).getTime() - parseISO(b.linkExpiry).getTime());
+  useEffect(() => {
+    const now = new Date();
+    const thirtyDaysFromNow = subDays(now, -30);
+
+    const expiring = entities
+      .filter(e => {
+          try {
+              const expiryDate = parseISO(e.linkExpiry);
+              return isBefore(expiryDate, thirtyDaysFromNow) && isBefore(now, expiryDate);
+          } catch {
+              return false;
+          }
+      })
+      .sort((a, b) => parseISO(a.linkExpiry).getTime() - parseISO(b.linkExpiry).getTime());
+    setExpiringSoon(expiring);
+  }, []);
+
 
   return (
     <div className="flex flex-col gap-6">
