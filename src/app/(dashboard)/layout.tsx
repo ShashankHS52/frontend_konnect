@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -37,6 +36,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
   SidebarFooter,
+  SidebarInset,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
