@@ -43,11 +43,11 @@ export default function LoginPage() {
               <Label htmlFor="password">Password</Label>
               <Input id="password" required type="password" defaultValue="password" />
             </div>
-            <Link href="/dashboard" className="w-full" passHref>
-              <Button className="w-full mt-4">
+            <Button className="w-full mt-4" asChild>
+              <Link href="/dashboard">
                 Login
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </CardContent>
       </Card>
