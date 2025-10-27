@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Copy, PlusCircle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -38,6 +38,11 @@ export function InviteGenerator() {
   const [entityName, setEntityName] = useState('');
   const [newlyGeneratedInvite, setNewlyGeneratedInvite] = useState(null);
   const { toast } = useToast();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const generateLink = () => {
     if (!entityName.trim()) {
@@ -80,10 +85,14 @@ export function InviteGenerator() {
 
   const getLocalDateString = (dateString) => {
     try {
-      return new Date(dateString).toLocaleDateString();
+      return new Date(dateString).toLocaleDate-string();
     } catch {
       return dateString;
     }
+  }
+
+  if (!isClient) {
+      return null;
   }
 
   return (
@@ -149,7 +158,7 @@ export function InviteGenerator() {
                             <TableCell>
                                 <StatusBadge status={invite.status} />
                             </TableCell>
-                            <TableCell>{getLocalDateString(invite.expiresAt)}</TableCell>
+                            <TableCell>{new Date(invite.expiresAt).toLocaleDateString()}</TableCell>
                             <TableCell>
                                 <Button variant="ghost" size="sm" onClick={() => {
                                     navigator.clipboard.writeText(invite.link);

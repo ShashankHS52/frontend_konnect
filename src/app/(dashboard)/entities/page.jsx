@@ -9,8 +9,10 @@ import { useEffect, useState } from 'react';
 
 export default function EntitiesPage() {
   const [expiringSoon, setExpiringSoon] = useState([]);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
     const now = new Date();
     const thirtyDaysFromNow = subDays(now, -30);
 
@@ -27,6 +29,9 @@ export default function EntitiesPage() {
     setExpiringSoon(expiring);
   }, []);
 
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col gap-6">

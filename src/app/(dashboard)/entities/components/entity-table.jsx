@@ -19,7 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { entities } from '@/lib/placeholder-data';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const statusVariants = {
     Activated: 'default',
@@ -35,6 +35,11 @@ const StatusBadge = ({ status }) => (
 
 export function EntityTable() {
     const [entityList, setEntityList] = useState(entities);
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     const getLocalDateString = (dateString) => {
         try {
@@ -42,6 +47,30 @@ export function EntityTable() {
         } catch {
             return dateString;
         }
+    }
+
+    if (!isClient) {
+        return (
+            <div className="w-full rounded-md border">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Entity Name</TableHead>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Registered On</TableHead>
+                            <TableHead>Link Expiry</TableHead>
+                            <TableHead><span className="sr-only">Actions</span></TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow>
+                            <TableCell colSpan={6} className="text-center">Loading...</TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </div>
+        );
     }
 
     return (

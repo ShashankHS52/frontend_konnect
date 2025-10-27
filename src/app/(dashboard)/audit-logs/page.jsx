@@ -15,6 +15,11 @@ import { useEffect, useState } from 'react';
 
 export default function AuditLogsPage() {
     const [logs, setLogs] = useState(auditLogs);
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     const getLocalDateTimeString = (dateString) => {
         try {
@@ -22,6 +27,10 @@ export default function AuditLogsPage() {
         } catch {
             return dateString;
         }
+    }
+
+    if (!isClient) {
+        return null; // Or a loading spinner
     }
 
     return (
