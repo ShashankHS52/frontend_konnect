@@ -58,6 +58,11 @@ const navItems = [
   { href: "/audit-logs", icon: History, label: "Audit Logs" },
 ];
 
+const secondaryNavItems = [
+    { href: "/notifications", icon: Bell, label: "Notifications" },
+    { href: "/settings", icon: Settings, label: "Settings" },
+]
+
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
   
@@ -66,6 +71,8 @@ export default function DashboardLayout({ children }) {
     if (pathname.startsWith('/entities')) return "Entity Management";
     if (pathname.startsWith('/invites')) return "Invite Link Management";
     if (pathname.startsWith('/audit-logs')) return "Audit Logs";
+    if (pathname.startsWith('/notifications')) return "Notifications";
+    if (pathname.startsWith('/settings')) return "Settings";
     return "SuperAdmin";
   };
 
@@ -95,6 +102,22 @@ export default function DashboardLayout({ children }) {
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter className="p-4 space-y-4 border-t border-sidebar-border">
+          <SidebarMenu>
+             {secondaryNavItems.map((item) => (
+              <SidebarMenuItem key={item.href}>
+                <Link href={item.href}>
+                  <SidebarMenuButton
+                    isActive={pathname.startsWith(item.href)}
+                    tooltip={item.label}
+                    className="justify-start gap-3"
+                  >
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="w-full justify-start gap-2 p-2 h-auto">
@@ -108,10 +131,12 @@ export default function DashboardLayout({ children }) {
             <DropdownMenuContent className="mb-2 w-56" side="right" align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
-              </DropdownMenuItem>
+              <Link href="/settings">
+                <DropdownMenuItem>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                </DropdownMenuItem>
+              </Link>
               <DropdownMenuSeparator />
               <Link href="/login">
                 <DropdownMenuItem>
@@ -134,10 +159,12 @@ export default function DashboardLayout({ children }) {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Search..." className="pl-10 bg-background" />
             </div>
-            <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0 text-xs">2</Badge>
-            </Button>
+            <Link href="/notifications">
+                <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-5 w-5" />
+                    <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0 text-xs">2</Badge>
+                </Button>
+            </Link>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
@@ -147,7 +174,7 @@ export default function DashboardLayout({ children }) {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Settings</DropdownMenuItem>
+                <Link href="/settings"><DropdownMenuItem>Settings</DropdownMenuItem></Link>
                 <DropdownMenuSeparator />
                 <Link href="/login"><DropdownMenuItem>Logout</DropdownMenuItem></Link>
               </DropdownMenuContent>
