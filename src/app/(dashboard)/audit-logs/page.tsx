@@ -16,23 +16,6 @@ import { useEffect, useState } from 'react';
 export default function AuditLogsPage() {
     const [logs, setLogs] = useState(auditLogs);
 
-    useEffect(() => {
-        // Mocks real-time update
-        const interval = setInterval(() => {
-            const newLog = {
-                id: `log${Date.now()}`,
-                timestamp: new Date().toISOString(),
-                entity: 'New Entity',
-                action: 'Entity Created',
-                user: 'system',
-                reason: 'Automatic generation'
-            };
-            setLogs(prev => [newLog, ...prev]);
-        }, 5000);
-        return () => clearInterval(interval);
-    }, []);
-
-
     const getLocalDateTimeString = (dateString: string) => {
         try {
             return new Date(dateString).toLocaleString();

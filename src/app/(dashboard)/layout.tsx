@@ -9,17 +9,14 @@ import {
   Briefcase,
   FileText,
   BarChart2,
-  Plug,
   Settings,
   LogOut,
   Bell,
   Search,
-  Moon,
-  Sun,
-  LayoutGrid,
-  File,
-  Puzzle,
-  List,
+  User,
+  Shield,
+  FileKey,
+  History,
 } from "lucide-react";
 
 import {
@@ -34,7 +31,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
-  SidebarInset,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
@@ -46,57 +42,41 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 
 const Logo = () => (
   <div className="flex items-center gap-2">
     <div className="bg-primary p-2 rounded-lg">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="white"
-        className="h-6 w-6"
-      >
-        <path d="M12.82,2.2L6.87,4.64C5.11,5.29 4.35,7.34 5.3,8.93L6.15,10.29L14,6.24L12.82,2.2M13.25,6.91L7,10.95L8,12.35C8.94,13.94 11,14.69 12.75,14.04L19.23,11.43L13.25,6.91M18.5,12.19L12.03,14.8C10.28,15.45 8.23,14.69 7.29,13.1L6.2,11.5L2,13.91V18.5C2,20.43 3.57,22 5.5,22H18.5C20.43,22 22,20.43 22,18.5V13.91L18.5,12.19Z" />
-      </svg>
+      <Shield className="h-6 w-6 text-primary-foreground" />
     </div>
     <div className="group-data-[collapsible=icon]:hidden">
-        <h1 className="text-2xl font-bold">fillow.</h1>
-        <p className="text-xs text-muted-foreground">SaaS Admin Dashboard</p>
+        <h1 className="text-xl font-bold">SuperAdmin</h1>
     </div>
   </div>
 );
 
 const navItems = [
   { href: "/dashboard", icon: Home, label: "Dashboard" },
-  { href: "/cms", icon: LayoutGrid, label: "CMS", badge: "New" },
-  { href: "/apps", icon: File, label: "Apps" },
-  { href: "/charts", icon: BarChart2, label: "Charts" },
-  { href: "/bootstrap", icon: Briefcase, label: "Bootstrap" },
-  { href: "/plugins", icon: Plug, label: "Plugins" },
-  { href: "/widget", icon: Puzzle, label: "Widget" },
-  { href: "/forms", icon: FileText, label: "Forms" },
-  { href: "/table", icon: List, label: "Table" },
-  { href: "/pages", icon: File, label: "Pages" },
+  { href: "/entities", icon: Briefcase, label: "Entities" },
+  { href: "/invites", icon: FileKey, label: "Invites" },
+  { href: "/audit-logs", icon: History, label: "Audit Logs" },
 ];
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   
   const getPageTitle = () => {
-    for (const item of navItems) {
-      if (pathname.startsWith(item.href)) {
-        return item.label;
-      }
-    }
-    return "Dashboard";
+    if (pathname === '/dashboard') return "Dashboard";
+    if (pathname.startsWith('/entities')) return "Entity Management";
+    if (pathname.startsWith('/invites')) return "Invite Link Management";
+    if (pathname.startsWith('/audit-logs')) return "Audit Logs";
+    return "SuperAdmin";
   };
 
   return (
     <SidebarProvider>
       <Sidebar side="left" collapsible="icon" className="border-r border-sidebar-border">
-        <SidebarHeader className="flex h-[88px] items-center p-4">
+        <SidebarHeader className="flex h-16 items-center p-4">
             <Logo />
         </SidebarHeader>
 
@@ -104,7 +84,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <SidebarMenu>
             {navItems.map((item) => (
               <SidebarMenuItem key={item.href}>
-                <Link href="#">
+                <Link href={item.href}>
                   <SidebarMenuButton
                     isActive={pathname.startsWith(item.href)}
                     tooltip={item.label}
@@ -120,20 +100,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter className="p-4 space-y-4 border-t border-sidebar-border">
-          <div className="group-data-[collapsible=icon]:hidden space-y-2">
-            <div className="flex justify-between items-center text-sm">
-                <p>My Progress</p>
-                <p>20/45</p>
-            </div>
-            <Progress value={20/45 * 100} className="h-2"/>
-          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="w-full justify-start gap-2 p-2 h-auto">
-                    <Image src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="user avatar" width={40} height={40} className="rounded-full" />
+                    <Image src="https://i.pravatar.cc/150?u=superadmin" alt="user avatar" width={40} height={40} className="rounded-full" />
                     <div className="text-left group-data-[collapsible=icon]:hidden">
-                        <p className="font-medium text-sm">Levi Siregar</p>
-                        <p className="text-xs text-sidebar-foreground/70">leviregar@mail.com</p>
+                        <p className="font-medium text-sm">Super Admin</p>
+                        <p className="text-xs text-sidebar-foreground/70">admin@super.app</p>
                     </div>
                 </Button>
             </DropdownMenuTrigger>
@@ -164,11 +137,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <div className="ml-auto flex items-center gap-4">
             <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search here..." className="pl-10 bg-background" />
+                <Input placeholder="Search..." className="pl-10 bg-background" />
             </div>
-            <Button variant="ghost" size="icon">
-                <Moon className="h-5 w-5" />
-            </Button>
             <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
                 <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0 text-xs">2</Badge>
@@ -176,14 +146,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
-                    <Image src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="user avatar" width={32} height={32} className="rounded-full" />
+                    <Image src="https://i.pravatar.cc/150?u=superadmin" alt="user avatar" width={32} height={32} className="rounded-full" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem>Support</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <Link href="/login"><DropdownMenuItem>Logout</DropdownMenuItem></Link>
               </DropdownMenuContent>
