@@ -1,7 +1,10 @@
+
+"use client";
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { AreaChart, BarChart, DonutChart, LineChart } from 'lucide-react';
+import { AreaChart, BarChart, LineChart, PieChart } from 'lucide-react';
 import Image from 'next/image';
 
 const projectStatsData = [
@@ -25,7 +28,7 @@ export default function DashboardPage() {
             <Button variant="secondary" className="bg-white text-primary hover:bg-white/90">Try Free Now</Button>
           </div>
           <div>
-            <Image src="/placeholder-image.svg" width={250} height={180} alt="Project management illustration" data-ai-hint="illustration dashboard"/>
+            <Image src="https://picsum.photos/seed/dashboard/250/180" width={250} height={180} alt="Project management illustration" data-ai-hint="illustration dashboard"/>
           </div>
         </CardContent>
        </Card>
@@ -52,7 +55,7 @@ export default function DashboardPage() {
               <span className="text-3xl font-bold">42</span>
               <span className="text-xs text-muted-foreground">76 left from target</span>
             </div>
-            <Progress value={42/76 * 100} className="h-2 mt-2" />
+            <Progress value={(42/76) * 100} className="h-2 mt-2" />
           </CardContent>
         </Card>
         <Card>
@@ -88,17 +91,17 @@ export default function DashboardPage() {
             <CardContent className="space-y-4">
               <div className="flex justify-around">
                   <div className="text-center">
-                    <DonutChart className="h-12 w-12 mx-auto text-primary" />
+                    <PieChart className="h-12 w-12 mx-auto text-primary" />
                     <p className="font-bold text-xl">246</p>
                     <p className="text-sm text-muted-foreground">Total Projects</p>
                   </div>
                    <div className="text-center">
-                    <DonutChart className="h-12 w-12 mx-auto text-yellow-500" />
+                    <PieChart className="h-12 w-12 mx-auto text-yellow-500" />
                     <p className="font-bold text-xl">246</p>
                     <p className="text-sm text-muted-foreground">On Going</p>
                   </div>
                    <div className="text-center">
-                    <DonutChart className="h-12 w-12 mx-auto text-pink-500" />
+                    <PieChart className="h-12 w-12 mx-auto text-pink-500" />
                     <p className="font-bold text-xl">28</p>
                     <p className="text-sm text-muted-foreground">Unfinished</p>
                   </div>
@@ -117,7 +120,7 @@ export default function DashboardPage() {
                 <p className="text-sm">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Id quibusdam eaque vero ullam odit nostrum nemo excepturi explicabo ipsum voluptas nihil quae doloremque ducimus.</p>
                 <div className="flex items-center justify-center space-y-4 flex-col">
                   <div className="w-40 h-40 relative">
-                      <DonutChart className="w-full h-full text-accent" strokeWidth="1.5"/>
+                      <PieChart className="w-full h-full text-accent" strokeWidth="1.5"/>
                       <div className="absolute inset-0 flex items-center justify-center">
                           <span className="text-3xl font-bold">70%</span>
                       </div>
