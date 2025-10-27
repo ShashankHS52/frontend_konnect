@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -10,8 +11,28 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { auditLogs } from '@/lib/placeholder-data';
+import { useEffect, useState } from 'react';
 
 export default function AuditLogsPage() {
+    const [logs, setLogs] = useState(auditLogs);
+
+    useEffect(() => {
+        // Mocks real-time update
+        const interval = setInterval(() => {
+            const newLog = {
+                id: `log${Date.now()}`,
+                timestamp: new Date().toISOString(),
+                entity: 'New Entity',
+                action: 'Entity Created',
+                user: 'system',
+                reason: 'Automatic generation'
+            };
+            setLogs(prev => [newLog, ...prev]);
+        }, 5000);
+        return () => clearInterval(interval);
+    }, []);
+
+
     const getLocalDateTimeString = (dateString: string) => {
         try {
             return new Date(dateString).toLocaleString();
@@ -39,7 +60,7 @@ export default function AuditLogsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {auditLogs.map((log) => (
+                            {logs.map((log) => (
                                 <TableRow key={log.id}>
                                     <TableCell>{getLocalDateTimeString(log.timestamp)}</TableCell>
                                     <TableCell className="font-medium">{log.entity}</TableCell>

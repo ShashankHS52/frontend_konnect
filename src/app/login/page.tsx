@@ -5,20 +5,22 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 const Logo = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="mr-2 h-6 w-6 text-primary"
-  >
-    <path d="M12 2L2 7l10 5 10-5-10-5z" />
-    <path d="M2 17l10 5 10-5" />
-    <path d="M2 12l10 5 10-5" />
-  </svg>
+    <div className="flex items-center gap-2">
+    <div className="bg-primary p-2 rounded-lg">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="white"
+        className="h-6 w-6"
+      >
+        <path d="M12.82,2.2L6.87,4.64C5.11,5.29 4.35,7.34 5.3,8.93L6.15,10.29L14,6.24L12.82,2.2M13.25,6.91L7,10.95L8,12.35C8.94,13.94 11,14.69 12.75,14.04L19.23,11.43L13.25,6.91M18.5,12.19L12.03,14.8C10.28,15.45 8.23,14.69 7.29,13.1L6.2,11.5L2,13.91V18.5C2,20.43 3.57,22 5.5,22H18.5C20.43,22 22,20.43 22,18.5V13.91L18.5,12.19Z" />
+      </svg>
+    </div>
+    <div>
+        <h1 className="text-2xl font-bold">fillow.</h1>
+        <p className="text-xs text-muted-foreground">SaaS Admin Dashboard</p>
+    </div>
+  </div>
 );
 
 export default function LoginPage() {
@@ -28,7 +30,6 @@ export default function LoginPage() {
         <CardHeader className="text-center">
           <div className="mb-4 flex items-center justify-center">
             <Logo />
-            <h1 className="text-2xl font-bold text-foreground">SuperAdmin</h1>
           </div>
           <CardTitle className="text-2xl">Welcome Back</CardTitle>
           <CardDescription>Enter your credentials to access the dashboard</CardDescription>
@@ -37,7 +38,7 @@ export default function LoginPage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="user_id">User ID</Label>
-              <Input id="user_id" placeholder="admin@example.com" required type="text" defaultValue="admin@super.app"/>
+              <Input id="user_id" placeholder="admin@example.com" required type="text" defaultValue="leviregar@mail.com"/>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
