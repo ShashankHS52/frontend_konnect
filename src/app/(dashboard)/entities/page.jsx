@@ -1,3 +1,4 @@
+
 "use client";
 
 import { EntityTable } from './components/entity-table';
@@ -6,10 +7,13 @@ import { subDays, isBefore, parseISO } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { InviteGeneratorDialog } from './components/invite-generator-dialog';
 
 export default function EntitiesPage() {
   const [expiringSoon, setExpiringSoon] = useState([]);
   const [isClient, setIsClient] = useState(false);
+  const [invites, setInvites] = useState([]);
+
 
   useEffect(() => {
     setIsClient(true);
@@ -31,6 +35,12 @@ export default function EntitiesPage() {
 
   if (!isClient) {
     return null;
+  }
+
+  const handleInviteGenerated = (newInvite) => {
+    // This is where you might want to update a shared state of invites
+    // For now, we can just log it or update a local state if needed.
+    console.log("New invite generated on entities page:", newInvite);
   }
 
   return (
@@ -58,8 +68,13 @@ export default function EntitiesPage() {
      
       <Card>
         <CardHeader>
-            <CardTitle>All Entities</CardTitle>
-            <CardDescription>Review and manage all registered colleges and organizations.</CardDescription>
+            <div className="flex items-start justify-between">
+                <div>
+                    <CardTitle>All Entities</CardTitle>
+                    <CardDescription>Review and manage all registered colleges and organizations.</CardDescription>
+                </div>
+                <InviteGeneratorDialog onInviteGenerated={handleInviteGenerated} />
+            </div>
         </CardHeader>
         <CardContent>
             <EntityTable />

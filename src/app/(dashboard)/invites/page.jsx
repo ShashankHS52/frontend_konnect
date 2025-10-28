@@ -1,4 +1,5 @@
-import { InviteGenerator } from './components/invite-generator';
+
+import { InvitesList } from './components/invites-list';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function InvitesPage() {
@@ -6,10 +7,10 @@ export default function InvitesPage() {
         <Card>
             <CardHeader>
                 <CardTitle>Invite Link Management</CardTitle>
-                <CardDescription>Generate and manage unique, time-bound invite links for colleges and organizations.</CardDescription>
+                <CardDescription>Manage and track all generated invite links for colleges and organizations.</CardDescription>
             </CardHeader>
             <CardContent>
-                <InviteGenerator />
+                <InvitesList />
             </CardContent>
         </Card>
     );
