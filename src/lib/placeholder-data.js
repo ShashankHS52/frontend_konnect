@@ -1,3 +1,4 @@
+
 export const entities = [
   { id: '1', name: 'Greenwood University', type: 'College', status: 'Activated', registeredOn: '2023-01-15' },
   { id: '2', name: 'Innovate Inc.', type: 'Organization', status: 'Activated', registeredOn: '2023-02-20' },
@@ -69,7 +70,7 @@ export const invites = [
 ];
 
 export const feedback = [
-    { id: 'fb1', user: 'Super Admin', message: 'The new dashboard charts look great! Much easier to read.', timestamp: '2024-07-22T10:30:00Z' },
-    { id: 'fb2', user: 'Super Admin', message: 'Could we get an option to export audit logs to CSV?', timestamp: '2024-07-21T15:00:00Z' },
-    { id: 'fb3', user: 'Super Admin', message: 'The invite generation flow is much smoother now. Good job!', timestamp: '2024-07-20T11:00:00Z' },
+    { id: 'fb1', user: 'Super Admin', email: 'admin@super.app', page: '/dashboard', message: 'The new dashboard charts look great! Much easier to read.', timestamp: '2024-07-22T10:30:00Z' },
+    { id: 'fb2', user: 'Test User', email: 'test@example.com', page: '/audit-logs', message: 'Could we get an option to export audit logs to CSV?', timestamp: '2024-07-21T15:00:00Z' },
+    { id: 'fb3', user: 'Another Admin', email: 'admin2@super.app', page: '/entities', message: 'The invite generation flow is much smoother now. Good job!', timestamp: '2024-07-20T11:00:00Z' },
 ];

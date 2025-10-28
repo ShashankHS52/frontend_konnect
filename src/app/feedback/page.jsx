@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { feedback as initialFeedback } from '@/lib/placeholder-data';
+import { Badge } from '@/components/ui/badge';
+import { File } from 'lucide-react';
 
 const getInitials = (name) => {
     if (!name) return 'A';
@@ -59,14 +61,21 @@ export default function FeedbackPage() {
                             </Avatar>
                             <div className="grid gap-1.5 flex-1">
                                 <div className="flex items-center justify-between">
-                                    <p className="text-sm font-semibold leading-none">
-                                        {feedback.user}
-                                    </p>
+                                    <div>
+                                        <p className="text-sm font-semibold leading-none">
+                                            {feedback.user}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">{feedback.email}</p>
+                                    </div>
                                     <p className="text-xs text-muted-foreground">{feedback.relativeTime}</p>
                                 </div>
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-sm text-muted-foreground mt-2">
                                     {feedback.message}
                                 </p>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
+                                    <File className="h-3 w-3" />
+                                    <span>Submitted from: <code className="bg-muted px-1 py-0.5 rounded">{feedback.page}</code></span>
+                                </div>
                             </div>
                         </div>
                     ))
