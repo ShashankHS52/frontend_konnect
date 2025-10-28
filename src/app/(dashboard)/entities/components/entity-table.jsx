@@ -59,13 +59,12 @@ export function EntityTable() {
                             <TableHead>Type</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Registered On</TableHead>
-                            <TableHead>Link Expiry</TableHead>
                             <TableHead><span className="sr-only">Actions</span></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         <TableRow>
-                            <TableCell colSpan={6} className="text-center">Loading...</TableCell>
+                            <TableCell colSpan={5} className="text-center">Loading...</TableCell>
                         </TableRow>
                     </TableBody>
                 </Table>
@@ -82,7 +81,6 @@ export function EntityTable() {
                     <TableHead>Type</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Registered On</TableHead>
-                    <TableHead>Link Expiry</TableHead>
                     <TableHead><span className="sr-only">Actions</span></TableHead>
                 </TableRow>
             </TableHeader>
@@ -93,7 +91,6 @@ export function EntityTable() {
                     <TableCell>{entity.type}</TableCell>
                     <TableCell><StatusBadge status={entity.status} /></TableCell>
                     <TableCell>{getLocalDateString(entity.registeredOn)}</TableCell>
-                    <TableCell>{getLocalDateString(entity.linkExpiry)}</TableCell>
                     <TableCell>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
