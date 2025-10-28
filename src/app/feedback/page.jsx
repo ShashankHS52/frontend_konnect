@@ -6,7 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { feedback as initialFeedback } from '@/lib/placeholder-data';
 import { Badge } from '@/components/ui/badge';
-import { File } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { File, MoreHorizontal, CheckCircle, Clock } from 'lucide-react';
 
 const getInitials = (name) => {
     if (!name) return 'A';
@@ -27,6 +29,19 @@ const getRelativeTime = (timestamp) => {
     return `${diffInDays}d ago`;
 };
 
+const statusConfig = {
+    Pending: {
+        variant: 'secondary',
+        icon: Clock,
+        label: 'Pending'
+    },
+    Resolved: {
+        variant: 'default',
+        icon: CheckCircle,
+        label: 'Resolved'
+    },
+};
+
 export default function FeedbackPage() {
     const [feedbackList, setFeedbackList] = useState([]);
     const [isClient, setIsClient] = useState(false);
@@ -40,6 +55,14 @@ export default function FeedbackPage() {
         setFeedbackList(processedFeedback);
     }, []);
 
+    const handleStatusChange = (feedbackId, newStatus) => {
+        setFeedbackList(currentList =>
+            currentList.map(item =>
+                item.id === feedbackId ? { ...item, status: newStatus } : item
+            )
+        );
+    };
+
     if (!isClient) {
         return null;
     }
@@ -49,12 +72,14 @@ export default function FeedbackPage() {
             <CardHeader>
                 <CardTitle>User Feedback</CardTitle>
                 <CardDescription>
-                    Review all feedback submitted by users during the testing phase.
+                    Review and manage all feedback submitted by users.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 {feedbackList.length > 0 ? (
-                    feedbackList.map((feedback) => (
+                    feedbackList.map((feedback) => {
+                        const StatusIcon = statusConfig[feedback.status]?.icon;
+                        return (
                         <div key={feedback.id} className="flex items-start gap-4 p-4 border rounded-lg">
                             <Avatar className="h-10 w-10 border">
                                 <AvatarFallback>{getInitials(feedback.user)}</AvatarFallback>
@@ -67,18 +92,45 @@ export default function FeedbackPage() {
                                         </p>
                                         <p className="text-xs text-muted-foreground">{feedback.email}</p>
                                     </div>
-                                    <p className="text-xs text-muted-foreground">{feedback.relativeTime}</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-xs text-muted-foreground">{feedback.relativeTime}</p>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="h-6 w-6">
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem onClick={() => handleStatusChange(feedback.id, 'Resolved')}>
+                                                    <CheckCircle className="mr-2 h-4 w-4" />
+                                                    Mark as Resolved
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handleStatusChange(feedback.id, 'Pending')}>
+                                                    <Clock className="mr-2 h-4 w-4" />
+                                                     Mark as Pending
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
                                 </div>
                                 <p className="text-sm text-muted-foreground mt-2">
                                     {feedback.message}
                                 </p>
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-                                    <File className="h-3 w-3" />
-                                    <span>Submitted from: <code className="bg-muted px-1 py-0.5 rounded">{feedback.page}</code></span>
+                                <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
+                                    <div className="flex items-center gap-2">
+                                        <File className="h-3 w-3" />
+                                        <span>Submitted from: <code className="bg-muted px-1 py-0.5 rounded">{feedback.page}</code></span>
+                                    </div>
+                                    <Badge variant={statusConfig[feedback.status].variant}>
+                                        {StatusIcon && (
+                                            <StatusIcon className="mr-1.5 h-3 w-3" />
+                                        )}
+                                        {statusConfig[feedback.status].label}
+                                    </Badge>
                                 </div>
                             </div>
                         </div>
-                    ))
+                    )})
                 ) : (
                     <p className="text-sm text-muted-foreground text-center">No feedback submitted yet.</p>
                 )}
