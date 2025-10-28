@@ -12,6 +12,7 @@ import {
   FileKey,
   History,
   Shield,
+  MessageSquare,
 } from "lucide-react";
 
 import {
@@ -39,6 +40,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
+import { FeedbackPopup } from "@/components/feedback/feedback-popup";
 
 const Logo = () => (
   <div className="flex items-center gap-2">
@@ -56,6 +58,7 @@ const navItems = [
   { href: "/entities", icon: Briefcase, label: "Entities" },
   { href: "/invites", icon: FileKey, label: "Invites" },
   { href: "/audit-logs", icon: History, label: "Audit Logs" },
+  { href: "/feedback", icon: MessageSquare, label: "Feedback" },
 ];
 
 const secondaryNavItems = [
@@ -71,6 +74,7 @@ export default function DashboardLayout({ children }) {
     if (pathname.startsWith('/entities')) return "Entity Management";
     if (pathname.startsWith('/invites')) return "Invite Link Management";
     if (pathname.startsWith('/audit-logs')) return "Audit Logs";
+    if (pathname.startsWith('/feedback')) return "User Feedback";
     if (pathname.startsWith('/notifications')) return "Notifications";
     if (pathname.startsWith('/settings')) return "Settings";
     return "SuperAdmin";
@@ -184,6 +188,7 @@ export default function DashboardLayout({ children }) {
         <main className="flex-1 p-4 sm:p-6 bg-background">
           {children}
         </main>
+        <FeedbackPopup />
         <Toaster />
       </SidebarInset>
     </SidebarProvider>
