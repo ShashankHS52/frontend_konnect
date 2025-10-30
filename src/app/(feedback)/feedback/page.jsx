@@ -314,7 +314,7 @@ export default function FeedbackPage() {
                                         <ArrowUpDown className="ml-2 h-4 w-4" />
                                     </Button>
                                 </TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead className="text-right pr-4">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -347,7 +347,7 @@ export default function FeedbackPage() {
                                                     {statusConfig[feedback.status]?.label}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell className="text-right">
+                                            <TableCell className="text-right pr-4">
                                                  <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
                                                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -422,5 +422,7 @@ export default function FeedbackPage() {
         </Card>
     );
 }
+
+    
 
     
