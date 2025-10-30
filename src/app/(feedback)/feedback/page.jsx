@@ -15,18 +15,16 @@ const getInitials = (name) => {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 };
 
-const getRelativeTime = (timestamp) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d ago`;
+const getFormattedDate = (timestamp) => {
+    try {
+        const date = new Date(timestamp);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    } catch {
+        return timestamp;
+    }
 };
 
 const statusConfig = {
@@ -50,7 +48,7 @@ export default function FeedbackPage() {
         setIsClient(true);
         const processedFeedback = initialFeedback.map(fb => ({
             ...fb,
-            relativeTime: getRelativeTime(fb.timestamp)
+            formattedDate: getFormattedDate(fb.timestamp)
         })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         setFeedbackList(processedFeedback);
     }, []);
@@ -93,7 +91,7 @@ export default function FeedbackPage() {
                                         <p className="text-xs text-muted-foreground">{feedback.email}</p>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <p className="text-xs text-muted-foreground">{feedback.relativeTime}</p>
+                                        <p className="text-xs text-muted-foreground">{feedback.formattedDate}</p>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" size="icon" className="h-6 w-6">
