@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { MessageSquare, Send, Paperclip, X, Loader2 } from 'lucide-react';
+import { MessageSquare, Send, Paperclip, X, Loader2, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -20,6 +20,80 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+function AddUserDialog({ onUserAdded }) {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
+    const { toast } = useToast();
+
+    const handleAddUser = async () => {
+        if (!name.trim() || !email.trim()) {
+            toast({
+                title: 'Missing Information',
+                description: 'Please provide both name and email.',
+                variant: 'destructive',
+            });
+            return;
+        }
+        setIsSubmitting(true);
+        try {
+            const response = await fetch('/api/test-users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email }),
+            });
+            if (!response.ok) throw new Error('Failed to add user');
+            const { user } = await response.json();
+            toast({ title: 'Success', description: 'New test user added.' });
+            onUserAdded(user);
+            setName('');
+            setEmail('');
+            setIsOpen(false);
+        } catch (error) {
+            toast({ title: 'Error', description: 'Could not add user.', variant: 'destructive' });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                <Button variant="ghost" className="w-full justify-center mt-1">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add New User
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-sm">
+                <DialogHeader>
+                    <DialogTitle>Add New Test User</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="new-user-name">Name</Label>
+                        <Input id="new-user-name" value={name} onChange={(e) => setName(e.target.value)} disabled={isSubmitting} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="new-user-email">Email</Label>
+                        <Input id="new-user-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isSubmitting} />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button type="button" variant="secondary" disabled={isSubmitting}>Cancel</Button>
+                    </DialogClose>
+                    <Button onClick={handleAddUser} disabled={isSubmitting}>
+                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Save
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
 
 export function FeedbackPopup() {
     const [name, setName] = useState('');
@@ -32,12 +106,47 @@ export function FeedbackPopup() {
     const [isOpen, setIsOpen] = useState(false);
     const pathname = usePathname();
 
+    const [users, setUsers] = useState([]);
+    const [selectedUserId, setSelectedUserId] = useState('');
+
+    useEffect(() => {
+        if (isOpen) {
+            const fetchUsers = async () => {
+                try {
+                    const response = await fetch('/api/test-users');
+                    if (!response.ok) throw new Error('Failed to fetch users');
+                    const data = await response.json();
+                    setUsers(data);
+                } catch (error) {
+                    toast({ title: 'Error', description: 'Could not load test users.', variant: 'destructive' });
+                }
+            };
+            fetchUsers();
+        }
+    }, [isOpen, toast]);
+
+    const handleUserSelect = (userId) => {
+        const selectedUser = users.find(u => u._id === userId);
+        if (selectedUser) {
+            setSelectedUserId(userId);
+            setName(selectedUser.name);
+            setEmail(selectedUser.email);
+        }
+    };
+
+    const handleUserAdded = (newUser) => {
+        const updatedUsers = [...users, newUser];
+        setUsers(updatedUsers);
+        handleUserSelect(newUser._id);
+    };
+
     const resetForm = () => {
         setName('');
         setEmail('');
         setMessage('');
         setScreenshot(null);
         setScreenshotPreview(null);
+        setSelectedUserId('');
     };
 
     const handleScreenshotChange = (e) => {
@@ -132,26 +241,26 @@ export function FeedbackPopup() {
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="space-y-2">
-                        <Label htmlFor="feedback-name">Name</Label>
-                        <Input 
-                            id="feedback-name"
-                            placeholder="Your Name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
+                        <Label htmlFor="feedback-user">User</Label>
+                        <Select
+                            value={selectedUserId}
+                            onValueChange={handleUserSelect}
                             disabled={isSubmitting}
-                        />
+                        >
+                            <SelectTrigger id="feedback-user">
+                                <SelectValue placeholder="Select a user..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {users.map(user => (
+                                    <SelectItem key={user._id} value={user._id}>
+                                        {user.name} ({user.email})
+                                    </SelectItem>
+                                ))}
+                                 <AddUserDialog onUserAdded={handleUserAdded} />
+                            </SelectContent>
+                        </Select>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="feedback-email">Email</Label>
-                        <Input 
-                            id="feedback-email"
-                            type="email"
-                            placeholder="Your Email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            disabled={isSubmitting}
-                        />
-                    </div>
+
                     <div className="space-y-2">
                         <Label htmlFor="feedback-message">Feedback</Label>
                         <Textarea
