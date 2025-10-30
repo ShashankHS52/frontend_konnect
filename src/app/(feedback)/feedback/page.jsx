@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
@@ -49,8 +50,8 @@ export default function FeedbackPage() {
     const [feedbackList, setFeedbackList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
-    const [nameFilter, setNameFilter] = useState('');
-    const [pageFilter, setPageFilter] = useState('');
+    const [nameFilter, setNameFilter] = useState('all');
+    const [pageFilter, setPageFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
 
     const fetchFeedback = async () => {
@@ -114,10 +115,20 @@ export default function FeedbackPage() {
         }
     };
 
+    const uniqueNames = useMemo(() => {
+        const names = new Set(feedbackList.map(fb => fb.user));
+        return Array.from(names);
+    }, [feedbackList]);
+
+    const uniquePages = useMemo(() => {
+        const pages = new Set(feedbackList.map(fb => fb.page));
+        return Array.from(pages);
+    }, [feedbackList]);
+
     const filteredFeedback = useMemo(() => {
         return feedbackList.filter(feedback => {
-            const nameMatch = feedback.user.toLowerCase().includes(nameFilter.toLowerCase());
-            const pageMatch = feedback.page.toLowerCase().includes(pageFilter.toLowerCase());
+            const nameMatch = nameFilter === 'all' || feedback.user === nameFilter;
+            const pageMatch = pageFilter === 'all' || feedback.page === pageFilter;
             const statusMatch = statusFilter === 'all' || feedback.status === statusFilter;
             return nameMatch && pageMatch && statusMatch;
         });
@@ -141,18 +152,28 @@ export default function FeedbackPage() {
             </CardHeader>
             <CardContent>
                 <div className="flex items-center gap-4 mb-6">
-                    <Input
-                        placeholder="Filter by name..."
-                        value={nameFilter}
-                        onChange={(e) => setNameFilter(e.target.value)}
-                        className="max-w-sm"
-                    />
-                    <Input
-                        placeholder="Filter by page..."
-                        value={pageFilter}
-                        onChange={(e) => setPageFilter(e.target.value)}
-                        className="max-w-sm"
-                    />
+                    <Select value={nameFilter} onValueChange={setNameFilter}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Filter by name" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Users</SelectItem>
+                            {uniqueNames.map(name => (
+                                <SelectItem key={name} value={name}>{name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Select value={pageFilter} onValueChange={setPageFilter}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Filter by page" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Pages</SelectItem>
+                             {uniquePages.map(page => (
+                                <SelectItem key={page} value={page}>{page}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
                         <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Filter by status" />
@@ -254,3 +275,4 @@ export default function FeedbackPage() {
         </Card>
     );
 }
+
