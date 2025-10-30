@@ -5,26 +5,14 @@ import { ObjectId } from 'mongodb';
 
 // Get the database instance, using the correct database name.
 async function getDb() {
-    try {
-        const client = await clientPromise;
-        // You can use ping to verify a successful connection.
-        await client.db("admin").command({ ping: 1 });
-        console.log("Successfully connected to MongoDB!");
-        return client.db("internship_portalDB");
-    } catch(e) {
-        console.error("Failed to connect to MongoDB", e);
-        return null;
-    }
+    const client = await clientPromise;
+    return client.db("internship_portalDB");
 }
 
 // GET all feedback
 export async function GET() {
-    const db = await getDb();
-    if (!db) {
-        return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
-    }
-    
     try {
+        const db = await getDb();
         const feedbacks = await db.collection('feedbacks').find({}).sort({ timestamp: -1 }).toArray();
         return NextResponse.json(feedbacks);
     } catch (e) {
@@ -35,12 +23,8 @@ export async function GET() {
 
 // POST new feedback
 export async function POST(request) {
-    const db = await getDb();
-    if (!db) {
-        return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
-    }
-
     try {
+        const db = await getDb();
         const feedback = await request.json();
         const result = await db.collection('feedbacks').insertOne({
             ...feedback,
@@ -56,12 +40,8 @@ export async function POST(request) {
 
 // PUT (update) feedback status
 export async function PUT(request) {
-    const db = await getDb();
-    if (!db) {
-        return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
-    }
-
     try {
+        const db = await getDb();
         const { id, status } = await request.json();
         if (!id || !status) {
             return NextResponse.json({ error: 'Missing id or status' }, { status: 400 });
