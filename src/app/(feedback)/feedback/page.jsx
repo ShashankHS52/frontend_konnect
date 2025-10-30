@@ -8,7 +8,13 @@ import { feedback as initialFeedback } from '@/lib/placeholder-data';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { File, MoreHorizontal, CheckCircle, Clock } from 'lucide-react';
+import { File, MoreHorizontal, CheckCircle, Clock, Paperclip } from 'lucide-react';
+import Image from 'next/image';
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 const getInitials = (name) => {
     if (!name) return 'A';
@@ -114,16 +120,29 @@ export default function FeedbackPage() {
                                 <p className="text-sm text-muted-foreground mt-2">
                                     {feedback.message}
                                 </p>
+                                {feedback.screenshot && (
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <Button variant="outline" size="sm" className="mt-2 w-fit">
+                                                <Paperclip className="mr-2 h-4 w-4" />
+                                                View Screenshot
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-3xl">
+                                            <Image src={feedback.screenshot} alt="Feedback screenshot" width={1280} height={720} className="rounded-md w-full h-auto" data-ai-hint="feedback screenshot" />
+                                        </DialogContent>
+                                    </Dialog>
+                                )}
                                 <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
                                     <div className="flex items-center gap-2">
                                         <File className="h-3 w-3" />
                                         <span>Submitted from: <code className="bg-muted px-1 py-0.5 rounded">{feedback.page}</code></span>
                                     </div>
-                                    <Badge variant={statusConfig[feedback.status].variant}>
+                                    <Badge variant={statusConfig[feedback.status]?.variant}>
                                         {StatusIcon && (
                                             <StatusIcon className="mr-1.5 h-3 w-3" />
                                         )}
-                                        {statusConfig[feedback.status].label}
+                                        {statusConfig[feedback.status]?.label}
                                     </Badge>
                                 </div>
                             </div>
