@@ -334,8 +334,8 @@ export default function FeedbackPage() {
                                                     </div>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="max-w-xs">
-                                                <p className="truncate text-sm text-muted-foreground">{feedback.message}</p>
+                                            <TableCell>
+                                                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{feedback.message}</p>
                                             </TableCell>
                                             <TableCell>
                                                 <code className="text-xs bg-muted px-1 py-0.5 rounded">{feedback.page}</code>
@@ -422,3 +422,5 @@ export default function FeedbackPage() {
         </Card>
     );
 }
+
+    
