@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { MessageSquare, Send, Paperclip, X } from 'lucide-react';
+import { MessageSquare, Send, Paperclip, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -27,6 +27,7 @@ export function FeedbackPopup() {
     const [message, setMessage] = useState('');
     const [screenshot, setScreenshot] = useState(null);
     const [screenshotPreview, setScreenshotPreview] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const { toast } = useToast();
     const [isOpen, setIsOpen] = useState(false);
     const pathname = usePathname();
@@ -54,7 +55,7 @@ export function FeedbackPopup() {
         }
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!name.trim() || !email.trim() || !message.trim()) {
             toast({
                 title: 'Missing Information',
@@ -64,17 +65,45 @@ export function FeedbackPopup() {
             return;
         }
 
-        // In a real app, you'd send this to a server.
-        // For now, we'll just log it and show a success message.
-        console.log('Feedback submitted:', { name, email, message, page: pathname, screenshot: screenshotPreview });
+        setIsSubmitting(true);
 
-        toast({
-            title: 'Feedback Submitted!',
-            description: "Thank you for helping us improve.",
-        });
-        
-        resetForm();
-        setIsOpen(false);
+        try {
+            const response = await fetch('/api/feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user: name,
+                    email,
+                    message,
+                    page: pathname,
+                    screenshot: screenshotPreview, // Send base64 string
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to submit feedback');
+            }
+
+            toast({
+                title: 'Feedback Submitted!',
+                description: "Thank you for helping us improve.",
+            });
+            
+            resetForm();
+            setIsOpen(false);
+
+        } catch (error) {
+            console.error('Feedback submission error:', error);
+            toast({
+                title: 'Submission Failed',
+                description: 'Could not submit your feedback. Please try again later.',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -109,6 +138,7 @@ export function FeedbackPopup() {
                             placeholder="Your Name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
+                            disabled={isSubmitting}
                         />
                     </div>
                     <div className="space-y-2">
@@ -119,6 +149,7 @@ export function FeedbackPopup() {
                             placeholder="Your Email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            disabled={isSubmitting}
                         />
                     </div>
                     <div className="space-y-2">
@@ -129,6 +160,7 @@ export function FeedbackPopup() {
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             className="min-h-[100px]"
+                            disabled={isSubmitting}
                         />
                     </div>
                     <div className="space-y-2">
@@ -139,6 +171,7 @@ export function FeedbackPopup() {
                             accept="image/*"
                             onChange={handleScreenshotChange}
                             className="text-sm"
+                            disabled={isSubmitting}
                         />
                          {screenshotPreview && (
                             <div className="mt-2 relative">
@@ -159,6 +192,7 @@ export function FeedbackPopup() {
                                         setScreenshotPreview(null);
                                         document.getElementById('feedback-screenshot').value = '';
                                     }}
+                                    disabled={isSubmitting}
                                 >
                                     <X className="h-4 w-4" />
                                     <span className="sr-only">Remove screenshot</span>
@@ -172,13 +206,13 @@ export function FeedbackPopup() {
                 </div>
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button type="button" variant="secondary">
+                        <Button type="button" variant="secondary" disabled={isSubmitting}>
                             Cancel
                         </Button>
                     </DialogClose>
-                    <Button onClick={handleSubmit} disabled={!name.trim() || !email.trim() || !message.trim()}>
-                        <Send className="mr-2 h-4 w-4" />
-                        Submit
+                    <Button onClick={handleSubmit} disabled={isSubmitting || !name.trim() || !email.trim() || !message.trim()}>
+                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                        {isSubmitting ? 'Submitting...' : 'Submit'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

@@ -4,17 +4,17 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { feedback as initialFeedback } from '@/lib/placeholder-data';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { File, MoreHorizontal, CheckCircle, Clock, Paperclip } from 'lucide-react';
+import { File, MoreHorizontal, CheckCircle, Clock, Paperclip, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import {
   Dialog,
   DialogContent,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 
 const getInitials = (name) => {
     if (!name) return 'A';
@@ -48,27 +48,76 @@ const statusConfig = {
 
 export default function FeedbackPage() {
     const [feedbackList, setFeedbackList] = useState([]);
-    const [isClient, setIsClient] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const { toast } = useToast();
 
-    useEffect(() => {
-        setIsClient(true);
-        const processedFeedback = initialFeedback.map(fb => ({
-            ...fb,
-            formattedDate: getFormattedDate(fb.timestamp)
-        })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-        setFeedbackList(processedFeedback);
-    }, []);
-
-    const handleStatusChange = (feedbackId, newStatus) => {
-        setFeedbackList(currentList =>
-            currentList.map(item =>
-                item.id === feedbackId ? { ...item, status: newStatus } : item
-            )
-        );
+    const fetchFeedback = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch('/api/feedback');
+            if (!response.ok) {
+                throw new Error('Failed to fetch feedback');
+            }
+            const data = await response.json();
+            const processedFeedback = data.map(fb => ({
+                ...fb,
+                id: fb._id, // Use MongoDB's _id
+                formattedDate: getFormattedDate(fb.timestamp)
+            }));
+            setFeedbackList(processedFeedback);
+        } catch (error) {
+            console.error(error);
+            toast({
+                title: 'Error',
+                description: 'Could not load feedback.',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    if (!isClient) {
-        return null;
+    useEffect(() => {
+        fetchFeedback();
+    }, []);
+
+    const handleStatusChange = async (feedbackId, newStatus) => {
+        try {
+            const response = await fetch('/api/feedback', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: feedbackId, status: newStatus }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update status');
+            }
+            
+            setFeedbackList(currentList =>
+                currentList.map(item =>
+                    item.id === feedbackId ? { ...item, status: newStatus } : item
+                )
+            );
+            toast({
+                title: 'Status Updated',
+                description: `Feedback marked as ${newStatus}.`,
+            });
+        } catch (error) {
+            console.error(error);
+            toast({
+                title: 'Error',
+                description: 'Could not update status.',
+                variant: 'destructive',
+            });
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+        );
     }
 
     return (
