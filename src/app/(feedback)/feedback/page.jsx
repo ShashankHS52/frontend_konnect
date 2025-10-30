@@ -7,13 +7,16 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { File, MoreHorizontal, CheckCircle, Clock, Paperclip, Loader2, X } from 'lucide-react';
+import { File, MoreHorizontal, CheckCircle, Clock, Paperclip, Loader2, X, CalendarIcon } from 'lucide-react';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
 
 const getInitials = (name) => {
     if (!name) return 'A';
@@ -53,6 +56,8 @@ export default function FeedbackPage() {
     const [nameFilter, setNameFilter] = useState('all');
     const [pageFilter, setPageFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [dateRange, setDateRange] = useState(undefined);
+
 
     const fetchFeedback = async () => {
         setIsLoading(true);
@@ -125,14 +130,37 @@ export default function FeedbackPage() {
         return Array.from(pages);
     }, [feedbackList]);
 
+    const handleResetFilters = () => {
+        setNameFilter('all');
+        setPageFilter('all');
+        setStatusFilter('all');
+        setDateRange(undefined);
+    };
+
     const filteredFeedback = useMemo(() => {
         return feedbackList.filter(feedback => {
             const nameMatch = nameFilter === 'all' || feedback.user === nameFilter;
             const pageMatch = pageFilter === 'all' || feedback.page === pageFilter;
             const statusMatch = statusFilter === 'all' || feedback.status === statusFilter;
-            return nameMatch && pageMatch && statusMatch;
+
+            const dateMatch = (() => {
+                if (!dateRange || (!dateRange.from && !dateRange.to)) return true;
+                const feedbackDate = new Date(feedback.timestamp);
+                if (dateRange.from && dateRange.to) {
+                    return feedbackDate >= dateRange.from && feedbackDate <= dateRange.to;
+                }
+                if (dateRange.from) {
+                    return feedbackDate >= dateRange.from;
+                }
+                if (dateRange.to) {
+                    return feedbackDate <= dateRange.to;
+                }
+                return true;
+            })();
+
+            return nameMatch && pageMatch && statusMatch && dateMatch;
         });
-    }, [feedbackList, nameFilter, pageFilter, statusFilter]);
+    }, [feedbackList, nameFilter, pageFilter, statusFilter, dateRange]);
 
     if (isLoading) {
         return (
@@ -151,9 +179,9 @@ export default function FeedbackPage() {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="flex items-center gap-4 mb-6">
+                <div className="flex flex-wrap items-center gap-4 mb-6">
                     <Select value={nameFilter} onValueChange={setNameFilter}>
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-full sm:w-[180px]">
                             <SelectValue placeholder="Filter by name" />
                         </SelectTrigger>
                         <SelectContent>
@@ -164,7 +192,7 @@ export default function FeedbackPage() {
                         </SelectContent>
                     </Select>
                     <Select value={pageFilter} onValueChange={setPageFilter}>
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-full sm:w-[180px]">
                             <SelectValue placeholder="Filter by page" />
                         </SelectTrigger>
                         <SelectContent>
@@ -175,7 +203,7 @@ export default function FeedbackPage() {
                         </SelectContent>
                     </Select>
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-full sm:w-[180px]">
                             <SelectValue placeholder="Filter by status" />
                         </SelectTrigger>
                         <SelectContent>
@@ -184,6 +212,42 @@ export default function FeedbackPage() {
                             <SelectItem value="Resolved">Resolved</SelectItem>
                         </SelectContent>
                     </Select>
+                     <Popover>
+                        <PopoverTrigger asChild>
+                        <Button
+                            variant={"outline"}
+                            className={"w-full sm:w-[280px] justify-start text-left font-normal"}
+                        >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {dateRange?.from ? (
+                            dateRange.to ? (
+                                <>
+                                {format(dateRange.from, "LLL dd, y")} -{" "}
+                                {format(dateRange.to, "LLL dd, y")}
+                                </>
+                            ) : (
+                                format(dateRange.from, "LLL dd, y")
+                            )
+                            ) : (
+                            <span>Pick a date range</span>
+                            )}
+                        </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                            initialFocus
+                            mode="range"
+                            defaultMonth={dateRange?.from}
+                            selected={dateRange}
+                            onSelect={setDateRange}
+                            numberOfMonths={2}
+                        />
+                        </PopoverContent>
+                    </Popover>
+                    <Button onClick={handleResetFilters} variant="ghost">
+                        <X className="mr-2 h-4 w-4" />
+                        Reset
+                    </Button>
                 </div>
                 <div className="rounded-md border">
                     <Table>
@@ -264,7 +328,7 @@ export default function FeedbackPage() {
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={6} className="h-24 text-center">
-                                        No feedback found.
+                                        No feedback found for the selected filters.
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -275,4 +339,3 @@ export default function FeedbackPage() {
         </Card>
     );
 }
-
