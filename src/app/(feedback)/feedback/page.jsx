@@ -299,22 +299,22 @@ export default function FeedbackPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>User</TableHead>
-                                <TableHead>Feedback</TableHead>
-                                <TableHead>Page</TableHead>
-                                <TableHead>
+                                <TableHead className="font-bold">User</TableHead>
+                                <TableHead className="font-bold">Feedback</TableHead>
+                                <TableHead className="font-bold">Page</TableHead>
+                                <TableHead className="font-bold">
                                     <Button variant="ghost" onClick={() => handleSort('timestamp')} className="-ml-4">
                                         Submitted
                                         <ArrowUpDown className="ml-2 h-4 w-4" />
                                     </Button>
                                 </TableHead>
-                                <TableHead>
+                                <TableHead className="font-bold">
                                     <Button variant="ghost" onClick={() => handleSort('status')} className="-ml-4">
                                         Status
                                         <ArrowUpDown className="ml-2 h-4 w-4" />
                                     </Button>
                                 </TableHead>
-                                <TableHead className="text-right pr-4">Actions</TableHead>
+                                <TableHead className="text-right pr-4 font-bold">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
