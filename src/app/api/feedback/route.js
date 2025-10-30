@@ -3,9 +3,10 @@ import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
+// Get the database instance, using the correct database name.
 async function getDb() {
     const client = await clientPromise;
-    return client.db(process.env.MONGODB_DB_NAME);
+    return client.db("internship_portalDB");
 }
 
 // GET all feedback
@@ -30,7 +31,8 @@ export async function POST(request) {
             timestamp: new Date().toISOString(),
             status: 'Pending',
         });
-        return NextResponse.json(result, { status: 201 });
+        // Return a clear success response with the inserted ID.
+        return NextResponse.json({ success: true, insertedId: result.insertedId }, { status: 201 });
     } catch (e) {
         console.error('Failed to create feedback', e);
         return NextResponse.json({ error: 'Failed to create feedback' }, { status: 500 });
