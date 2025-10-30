@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { File, MoreHorizontal, CheckCircle, Clock, Paperclip, Loader2, X, CalendarIcon, ArrowUpDown } from 'lucide-react';
+import { File, MoreHorizontal, CheckCircle, Clock, Paperclip, Loader2, X, CalendarIcon, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -49,6 +49,8 @@ const statusConfig = {
     },
 };
 
+const ROWS_PER_PAGE = 10;
+
 export default function FeedbackPage() {
     const [feedbackList, setFeedbackList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -58,6 +60,7 @@ export default function FeedbackPage() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [dateRange, setDateRange] = useState(undefined);
     const [sortConfig, setSortConfig] = useState({ key: 'timestamp', direction: 'desc' });
+    const [currentPage, setCurrentPage] = useState(1);
 
 
     const fetchFeedback = async () => {
@@ -137,6 +140,7 @@ export default function FeedbackPage() {
         setStatusFilter('all');
         setDateRange(undefined);
         setSortConfig({ key: 'timestamp', direction: 'desc' });
+        setCurrentPage(1);
     };
 
     const handleSort = (key) => {
@@ -173,21 +177,36 @@ export default function FeedbackPage() {
 
         if (sortConfig.key) {
             filtered.sort((a, b) => {
-                const dateA = new Date(a[sortConfig.key]).getTime();
-                const dateB = new Date(b[sortConfig.key]).getTime();
-                if (dateA < dateB) {
+                if (sortConfig.key === 'timestamp') {
+                    const dateA = new Date(a.timestamp).getTime();
+                    const dateB = new Date(b.timestamp).getTime();
+                    return sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA;
+                }
+                if (a[sortConfig.key] < b[sortConfig.key]) {
                     return sortConfig.direction === 'asc' ? -1 : 1;
                 }
-                if (dateA > dateB) {
+                if (a[sortConfig.key] > b[sortConfig.key]) {
                     return sortConfig.direction === 'asc' ? 1 : -1;
                 }
                 return 0;
             });
         }
-
         return filtered;
 
     }, [feedbackList, nameFilter, pageFilter, statusFilter, dateRange, sortConfig]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [nameFilter, pageFilter, statusFilter, dateRange]);
+    
+    const totalPages = Math.ceil(filteredAndSortedFeedback.length / ROWS_PER_PAGE);
+
+    const paginatedFeedback = useMemo(() => {
+        const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
+        const endIndex = startIndex + ROWS_PER_PAGE;
+        return filteredAndSortedFeedback.slice(startIndex, endIndex);
+    }, [filteredAndSortedFeedback, currentPage]);
+
 
     if (isLoading) {
         return (
@@ -289,13 +308,18 @@ export default function FeedbackPage() {
                                         <ArrowUpDown className="ml-2 h-4 w-4" />
                                     </Button>
                                 </TableHead>
-                                <TableHead>Status</TableHead>
+                                <TableHead>
+                                    <Button variant="ghost" onClick={() => handleSort('status')} className="-ml-4">
+                                        Status
+                                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredAndSortedFeedback.length > 0 ? (
-                                filteredAndSortedFeedback.map((feedback) => {
+                            {paginatedFeedback.length > 0 ? (
+                                paginatedFeedback.map((feedback) => {
                                     const StatusIcon = statusConfig[feedback.status]?.icon;
                                     return (
                                         <TableRow key={feedback.id}>
@@ -367,6 +391,33 @@ export default function FeedbackPage() {
                         </TableBody>
                     </Table>
                 </div>
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between mt-4">
+                        <span className="text-sm text-muted-foreground">
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                                <span className="sr-only">Previous Page</span>
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                                <span className="sr-only">Next Page</span>
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </CardContent>
         </Card>
     );
