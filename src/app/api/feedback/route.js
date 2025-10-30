@@ -1,10 +1,11 @@
+
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
 async function getDb() {
     const client = await clientPromise;
-    return client.db(process.env.DB_NAME);
+    return client.db(process.env.MONGODB_DB_NAME);
 }
 
 // GET all feedback
