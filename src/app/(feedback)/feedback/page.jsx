@@ -1,20 +1,18 @@
-
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { File, MoreHorizontal, CheckCircle, Clock, Paperclip, Loader2 } from 'lucide-react';
+import { File, MoreHorizontal, CheckCircle, Clock, Paperclip, Loader2, X } from 'lucide-react';
 import Image from 'next/image';
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const getInitials = (name) => {
     if (!name) return 'A';
@@ -24,10 +22,11 @@ const getInitials = (name) => {
 const getFormattedDate = (timestamp) => {
     try {
         const date = new Date(timestamp);
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
+        return date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
     } catch {
         return timestamp;
     }
@@ -50,6 +49,9 @@ export default function FeedbackPage() {
     const [feedbackList, setFeedbackList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
+    const [nameFilter, setNameFilter] = useState('');
+    const [pageFilter, setPageFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
 
     const fetchFeedback = async () => {
         setIsLoading(true);
@@ -112,6 +114,15 @@ export default function FeedbackPage() {
         }
     };
 
+    const filteredFeedback = useMemo(() => {
+        return feedbackList.filter(feedback => {
+            const nameMatch = feedback.user.toLowerCase().includes(nameFilter.toLowerCase());
+            const pageMatch = feedback.page.toLowerCase().includes(pageFilter.toLowerCase());
+            const statusMatch = statusFilter === 'all' || feedback.status === statusFilter;
+            return nameMatch && pageMatch && statusMatch;
+        });
+    }, [feedbackList, nameFilter, pageFilter, statusFilter]);
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -125,81 +136,120 @@ export default function FeedbackPage() {
             <CardHeader>
                 <CardTitle>User Feedback</CardTitle>
                 <CardDescription>
-                    Review and manage all feedback submitted by users.
+                    Review, filter, and manage all feedback submitted by users.
                 </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-                {feedbackList.length > 0 ? (
-                    feedbackList.map((feedback) => {
-                        const StatusIcon = statusConfig[feedback.status]?.icon;
-                        return (
-                        <div key={feedback.id} className="flex items-start gap-4 p-4 border rounded-lg">
-                            <Avatar className="h-10 w-10 border">
-                                <AvatarFallback>{getInitials(feedback.user)}</AvatarFallback>
-                            </Avatar>
-                            <div className="grid gap-1.5 flex-1">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-semibold leading-none">
-                                            {feedback.user}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">{feedback.email}</p>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <p className="text-xs text-muted-foreground">{feedback.formattedDate}</p>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="h-6 w-6">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => handleStatusChange(feedback.id, 'Resolved')}>
-                                                    <CheckCircle className="mr-2 h-4 w-4" />
-                                                    Mark as Resolved
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => handleStatusChange(feedback.id, 'Pending')}>
-                                                    <Clock className="mr-2 h-4 w-4" />
-                                                     Mark as Pending
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </div>
-                                </div>
-                                <p className="text-sm text-muted-foreground mt-2">
-                                    {feedback.message}
-                                </p>
-                                {feedback.screenshot && (
-                                    <Dialog>
-                                        <DialogTrigger asChild>
-                                            <Button variant="outline" size="sm" className="mt-2 w-fit">
-                                                <Paperclip className="mr-2 h-4 w-4" />
-                                                View Screenshot
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent className="max-w-3xl">
-                                            <Image src={feedback.screenshot} alt="Feedback screenshot" width={1280} height={720} className="rounded-md w-full h-auto" data-ai-hint="feedback screenshot" />
-                                        </DialogContent>
-                                    </Dialog>
-                                )}
-                                <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
-                                    <div className="flex items-center gap-2">
-                                        <File className="h-3 w-3" />
-                                        <span>Submitted from: <code className="bg-muted px-1 py-0.5 rounded">{feedback.page}</code></span>
-                                    </div>
-                                    <Badge variant={statusConfig[feedback.status]?.variant}>
-                                        {StatusIcon && (
-                                            <StatusIcon className="mr-1.5 h-3 w-3" />
-                                        )}
-                                        {statusConfig[feedback.status]?.label}
-                                    </Badge>
-                                </div>
-                            </div>
-                        </div>
-                    )})
-                ) : (
-                    <p className="text-sm text-muted-foreground text-center">No feedback submitted yet.</p>
-                )}
+            <CardContent>
+                <div className="flex items-center gap-4 mb-6">
+                    <Input
+                        placeholder="Filter by name..."
+                        value={nameFilter}
+                        onChange={(e) => setNameFilter(e.target.value)}
+                        className="max-w-sm"
+                    />
+                    <Input
+                        placeholder="Filter by page..."
+                        value={pageFilter}
+                        onChange={(e) => setPageFilter(e.target.value)}
+                        className="max-w-sm"
+                    />
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Filter by status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="Pending">Pending</SelectItem>
+                            <SelectItem value="Resolved">Resolved</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="rounded-md border">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>User</TableHead>
+                                <TableHead>Feedback</TableHead>
+                                <TableHead>Page</TableHead>
+                                <TableHead>Submitted</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredFeedback.length > 0 ? (
+                                filteredFeedback.map((feedback) => {
+                                    const StatusIcon = statusConfig[feedback.status]?.icon;
+                                    return (
+                                        <TableRow key={feedback.id}>
+                                            <TableCell>
+                                                <div className="flex items-center gap-3">
+                                                    <Avatar className="h-9 w-9 border">
+                                                        <AvatarFallback>{getInitials(feedback.user)}</AvatarFallback>
+                                                    </Avatar>
+                                                    <div>
+                                                        <p className="font-medium">{feedback.user}</p>
+                                                        <p className="text-xs text-muted-foreground">{feedback.email}</p>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="max-w-xs">
+                                                <p className="truncate text-sm text-muted-foreground">{feedback.message}</p>
+                                            </TableCell>
+                                            <TableCell>
+                                                <code className="text-xs bg-muted px-1 py-0.5 rounded">{feedback.page}</code>
+                                            </TableCell>
+                                            <TableCell className="text-xs text-muted-foreground">{feedback.formattedDate}</TableCell>
+                                            <TableCell>
+                                                <Badge variant={statusConfig[feedback.status]?.variant}>
+                                                    {StatusIcon && <StatusIcon className="mr-1.5 h-3 w-3" />}
+                                                    {statusConfig[feedback.status]?.label}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                 <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                            <MoreHorizontal className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        {feedback.screenshot && (
+                                                          <Dialog>
+                                                              <DialogTrigger asChild>
+                                                                  <Button variant="ghost" className="w-full justify-start font-normal h-auto py-1.5 px-2 text-sm">
+                                                                    <Paperclip className="mr-2 h-4 w-4" /> View Screenshot
+                                                                  </Button>
+                                                              </DialogTrigger>
+                                                              <DialogContent className="max-w-3xl">
+                                                                  <Image src={feedback.screenshot} alt="Feedback screenshot" width={1280} height={720} className="rounded-md w-full h-auto" data-ai-hint="feedback screenshot" />
+                                                              </DialogContent>
+                                                          </Dialog>
+                                                        )}
+                                                        <DropdownMenuItem onClick={() => handleStatusChange(feedback.id, 'Resolved')}>
+                                                            <CheckCircle className="mr-2 h-4 w-4" />
+                                                            Mark as Resolved
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleStatusChange(feedback.id, 'Pending')}>
+                                                            <Clock className="mr-2 h-4 w-4" />
+                                                            Mark as Pending
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="h-24 text-center">
+                                        No feedback found.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
             </CardContent>
         </Card>
     );
