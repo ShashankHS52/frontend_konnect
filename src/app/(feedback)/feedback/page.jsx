@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { File, MoreHorizontal, CheckCircle, Clock, Paperclip, Loader2, X, CalendarIcon } from 'lucide-react';
+import { File, MoreHorizontal, CheckCircle, Clock, Paperclip, Loader2, X, CalendarIcon, ArrowUpDown } from 'lucide-react';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -57,6 +57,7 @@ export default function FeedbackPage() {
     const [pageFilter, setPageFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
     const [dateRange, setDateRange] = useState(undefined);
+    const [sortConfig, setSortConfig] = useState({ key: 'timestamp', direction: 'desc' });
 
 
     const fetchFeedback = async () => {
@@ -135,10 +136,19 @@ export default function FeedbackPage() {
         setPageFilter('all');
         setStatusFilter('all');
         setDateRange(undefined);
+        setSortConfig({ key: 'timestamp', direction: 'desc' });
     };
 
-    const filteredFeedback = useMemo(() => {
-        return feedbackList.filter(feedback => {
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const filteredAndSortedFeedback = useMemo(() => {
+        let filtered = feedbackList.filter(feedback => {
             const nameMatch = nameFilter === 'all' || feedback.user === nameFilter;
             const pageMatch = pageFilter === 'all' || feedback.page === pageFilter;
             const statusMatch = statusFilter === 'all' || feedback.status === statusFilter;
@@ -160,7 +170,24 @@ export default function FeedbackPage() {
 
             return nameMatch && pageMatch && statusMatch && dateMatch;
         });
-    }, [feedbackList, nameFilter, pageFilter, statusFilter, dateRange]);
+
+        if (sortConfig.key) {
+            filtered.sort((a, b) => {
+                const dateA = new Date(a[sortConfig.key]).getTime();
+                const dateB = new Date(b[sortConfig.key]).getTime();
+                if (dateA < dateB) {
+                    return sortConfig.direction === 'asc' ? -1 : 1;
+                }
+                if (dateA > dateB) {
+                    return sortConfig.direction === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+        }
+
+        return filtered;
+
+    }, [feedbackList, nameFilter, pageFilter, statusFilter, dateRange, sortConfig]);
 
     if (isLoading) {
         return (
@@ -256,14 +283,19 @@ export default function FeedbackPage() {
                                 <TableHead>User</TableHead>
                                 <TableHead>Feedback</TableHead>
                                 <TableHead>Page</TableHead>
-                                <TableHead>Submitted</TableHead>
+                                <TableHead>
+                                    <Button variant="ghost" onClick={() => handleSort('timestamp')} className="-ml-4">
+                                        Submitted
+                                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredFeedback.length > 0 ? (
-                                filteredFeedback.map((feedback) => {
+                            {filteredAndSortedFeedback.length > 0 ? (
+                                filteredAndSortedFeedback.map((feedback) => {
                                     const StatusIcon = statusConfig[feedback.status]?.icon;
                                     return (
                                         <TableRow key={feedback.id}>
