@@ -5,14 +5,26 @@ import { ObjectId } from 'mongodb';
 
 // Get the database instance, using the correct database name.
 async function getDb() {
-    const client = await clientPromise;
-    return client.db("internship_portalDB");
+    try {
+        const client = await clientPromise;
+        // You can use ping to verify a successful connection.
+        await client.db("admin").command({ ping: 1 });
+        console.log("Successfully connected to MongoDB!");
+        return client.db("internship_portalDB");
+    } catch(e) {
+        console.error("Failed to connect to MongoDB", e);
+        return null;
+    }
 }
 
 // GET all feedback
 export async function GET() {
+    const db = await getDb();
+    if (!db) {
+        return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
+    }
+    
     try {
-        const db = await getDb();
         const feedbacks = await db.collection('feedbacks').find({}).sort({ timestamp: -1 }).toArray();
         return NextResponse.json(feedbacks);
     } catch (e) {
@@ -23,15 +35,18 @@ export async function GET() {
 
 // POST new feedback
 export async function POST(request) {
+    const db = await getDb();
+    if (!db) {
+        return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
+    }
+
     try {
         const feedback = await request.json();
-        const db = await getDb();
         const result = await db.collection('feedbacks').insertOne({
             ...feedback,
             timestamp: new Date().toISOString(),
             status: 'Pending',
         });
-        // Return a clear success response with the inserted ID.
         return NextResponse.json({ success: true, insertedId: result.insertedId }, { status: 201 });
     } catch (e) {
         console.error('Failed to create feedback', e);
@@ -41,12 +56,17 @@ export async function POST(request) {
 
 // PUT (update) feedback status
 export async function PUT(request) {
+    const db = await getDb();
+    if (!db) {
+        return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
+    }
+
     try {
         const { id, status } = await request.json();
         if (!id || !status) {
             return NextResponse.json({ error: 'Missing id or status' }, { status: 400 });
         }
-        const db = await getDb();
+        
         const result = await db.collection('feedbacks').updateOne(
             { _id: new ObjectId(id) },
             { $set: { status: status } }
