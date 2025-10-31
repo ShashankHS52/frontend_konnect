@@ -47,7 +47,7 @@ const Logo = () => (
   <div className="relative flex items-center gap-2 group/logo justify-between w-full">
     <div className="flex items-center gap-2">
       <div className="relative bg-primary p-2 rounded-lg">
-        <Shield className="h-6 w-6 text-primary-foreground transition-opacity group-hover/logo:opacity-50" />
+        <Shield className="h-6 w-6 text-primary-foreground transition-opacity group-hover/logo:opacity-0" />
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/logo:opacity-100 transition-opacity duration-200">
           <SidebarTrigger className="h-7 w-7 text-primary-foreground" />
         </div>
