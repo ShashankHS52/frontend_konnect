@@ -1,20 +1,22 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { File, MoreHorizontal, CheckCircle, Clock, Paperclip, Loader2 } from 'lucide-react';
+import { File, MoreHorizontal, CheckCircle, Clock, Paperclip, Loader2, X, CalendarIcon, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
 
 const getInitials = (name) => {
     if (!name) return 'A';
@@ -24,10 +26,11 @@ const getInitials = (name) => {
 const getFormattedDate = (timestamp) => {
     try {
         const date = new Date(timestamp);
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
+        return date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
     } catch {
         return timestamp;
     }
@@ -46,10 +49,20 @@ const statusConfig = {
     },
 };
 
+const ROWS_PER_PAGE = 10;
+
 export default function FeedbackPage() {
     const [feedbackList, setFeedbackList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
+    const [nameFilter, setNameFilter] = useState('all');
+    const [pageFilter, setPageFilter] = useState('all');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [dateRange, setDateRange] = useState(undefined);
+    const [sortConfig, setSortConfig] = useState({ key: 'timestamp', direction: 'desc' });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [expandedRowId, setExpandedRowId] = useState(null);
+
 
     const fetchFeedback = async () => {
         setIsLoading(true);
@@ -80,6 +93,10 @@ export default function FeedbackPage() {
     useEffect(() => {
         fetchFeedback();
     }, []);
+    
+    const toggleRowExpansion = (feedbackId) => {
+        setExpandedRowId(currentId => (currentId === feedbackId ? null : feedbackId));
+    };
 
     const handleStatusChange = async (feedbackId, newStatus) => {
         try {
@@ -112,6 +129,90 @@ export default function FeedbackPage() {
         }
     };
 
+    const uniqueNames = useMemo(() => {
+        const names = new Set(feedbackList.map(fb => fb.user));
+        return Array.from(names);
+    }, [feedbackList]);
+
+    const uniquePages = useMemo(() => {
+        const pages = new Set(feedbackList.map(fb => fb.page));
+        return Array.from(pages);
+    }, [feedbackList]);
+
+    const handleResetFilters = () => {
+        setNameFilter('all');
+        setPageFilter('all');
+        setStatusFilter('all');
+        setDateRange(undefined);
+        setSortConfig({ key: 'timestamp', direction: 'desc' });
+        setCurrentPage(1);
+    };
+
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const filteredAndSortedFeedback = useMemo(() => {
+        let filtered = feedbackList.filter(feedback => {
+            const nameMatch = nameFilter === 'all' || feedback.user === nameFilter;
+            const pageMatch = pageFilter === 'all' || feedback.page === pageFilter;
+            const statusMatch = statusFilter === 'all' || feedback.status === statusFilter;
+
+            const dateMatch = (() => {
+                if (!dateRange || (!dateRange.from && !dateRange.to)) return true;
+                const feedbackDate = new Date(feedback.timestamp);
+                if (dateRange.from && dateRange.to) {
+                    return feedbackDate >= dateRange.from && feedbackDate <= dateRange.to;
+                }
+                if (dateRange.from) {
+                    return feedbackDate >= dateRange.from;
+                }
+                if (dateRange.to) {
+                    return feedbackDate <= dateRange.to;
+                }
+                return true;
+            })();
+
+            return nameMatch && pageMatch && statusMatch && dateMatch;
+        });
+
+        if (sortConfig.key) {
+            filtered.sort((a, b) => {
+                if (sortConfig.key === 'timestamp') {
+                    const dateA = new Date(a.timestamp).getTime();
+                    const dateB = new Date(b.timestamp).getTime();
+                    return sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA;
+                }
+                if (a[sortConfig.key] < b[sortConfig.key]) {
+                    return sortConfig.direction === 'asc' ? -1 : 1;
+                }
+                if (a[sortConfig.key] > b[sortConfig.key]) {
+                    return sortConfig.direction === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+        }
+        return filtered;
+
+    }, [feedbackList, nameFilter, pageFilter, statusFilter, dateRange, sortConfig]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [nameFilter, pageFilter, statusFilter, dateRange]);
+    
+    const totalPages = Math.ceil(filteredAndSortedFeedback.length / ROWS_PER_PAGE);
+
+    const paginatedFeedback = useMemo(() => {
+        const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
+        const endIndex = startIndex + ROWS_PER_PAGE;
+        return filteredAndSortedFeedback.slice(startIndex, endIndex);
+    }, [filteredAndSortedFeedback, currentPage]);
+
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -125,82 +226,212 @@ export default function FeedbackPage() {
             <CardHeader>
                 <CardTitle>User Feedback</CardTitle>
                 <CardDescription>
-                    Review and manage all feedback submitted by users.
+                    Review, filter, and manage all feedback submitted by users.
                 </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-                {feedbackList.length > 0 ? (
-                    feedbackList.map((feedback) => {
-                        const StatusIcon = statusConfig[feedback.status]?.icon;
-                        return (
-                        <div key={feedback.id} className="flex items-start gap-4 p-4 border rounded-lg">
-                            <Avatar className="h-10 w-10 border">
-                                <AvatarFallback>{getInitials(feedback.user)}</AvatarFallback>
-                            </Avatar>
-                            <div className="grid gap-1.5 flex-1">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-semibold leading-none">
-                                            {feedback.user}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">{feedback.email}</p>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <p className="text-xs text-muted-foreground">{feedback.formattedDate}</p>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="h-6 w-6">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => handleStatusChange(feedback.id, 'Resolved')}>
-                                                    <CheckCircle className="mr-2 h-4 w-4" />
-                                                    Mark as Resolved
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => handleStatusChange(feedback.id, 'Pending')}>
-                                                    <Clock className="mr-2 h-4 w-4" />
-                                                     Mark as Pending
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </div>
-                                </div>
-                                <p className="text-sm text-muted-foreground mt-2">
-                                    {feedback.message}
-                                </p>
-                                {feedback.screenshot && (
-                                    <Dialog>
-                                        <DialogTrigger asChild>
-                                            <Button variant="outline" size="sm" className="mt-2 w-fit">
-                                                <Paperclip className="mr-2 h-4 w-4" />
-                                                View Screenshot
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent className="max-w-3xl">
-                                            <Image src={feedback.screenshot} alt="Feedback screenshot" width={1280} height={720} className="rounded-md w-full h-auto" data-ai-hint="feedback screenshot" />
-                                        </DialogContent>
-                                    </Dialog>
-                                )}
-                                <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
-                                    <div className="flex items-center gap-2">
-                                        <File className="h-3 w-3" />
-                                        <span>Submitted from: <code className="bg-muted px-1 py-0.5 rounded">{feedback.page}</code></span>
-                                    </div>
-                                    <Badge variant={statusConfig[feedback.status]?.variant}>
-                                        {StatusIcon && (
-                                            <StatusIcon className="mr-1.5 h-3 w-3" />
-                                        )}
-                                        {statusConfig[feedback.status]?.label}
-                                    </Badge>
-                                </div>
-                            </div>
+            <CardContent>
+                <div className="flex flex-wrap items-center gap-4 mb-6">
+                    <Select value={nameFilter} onValueChange={setNameFilter}>
+                        <SelectTrigger className="w-full sm:w-[180px]">
+                            <SelectValue placeholder="Filter by name" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Users</SelectItem>
+                            {uniqueNames.map(name => (
+                                <SelectItem key={name} value={name}>{name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Select value={pageFilter} onValueChange={setPageFilter}>
+                        <SelectTrigger className="w-full sm:w-[180px]">
+                            <SelectValue placeholder="Filter by page" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Pages</SelectItem>
+                             {uniquePages.map(page => (
+                                <SelectItem key={page} value={page}>{page}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger className="w-full sm:w-[180px]">
+                            <SelectValue placeholder="Filter by status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="Pending">Pending</SelectItem>
+                            <SelectItem value="Resolved">Resolved</SelectItem>
+                        </SelectContent>
+                    </Select>
+                     <Popover>
+                        <PopoverTrigger asChild>
+                        <Button
+                            variant={"outline"}
+                            className={"w-full sm:w-[280px] justify-start text-left font-normal"}
+                        >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {dateRange?.from ? (
+                            dateRange.to ? (
+                                <>
+                                {format(dateRange.from, "LLL dd, y")} -{" "}
+                                {format(dateRange.to, "LLL dd, y")}
+                                </>
+                            ) : (
+                                format(dateRange.from, "LLL dd, y")
+                            )
+                            ) : (
+                            <span>Pick a date range</span>
+                            )}
+                        </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                            initialFocus
+                            mode="range"
+                            defaultMonth={dateRange?.from}
+                            selected={dateRange}
+                            onSelect={setDateRange}
+                            numberOfMonths={2}
+                        />
+                        </PopoverContent>
+                    </Popover>
+                    <Button onClick={handleResetFilters} variant="ghost">
+                        <X className="mr-2 h-4 w-4" />
+                        Reset
+                    </Button>
+                </div>
+                <div className="rounded-md border">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="font-bold">User</TableHead>
+                                <TableHead className="font-bold">Feedback</TableHead>
+                                <TableHead className="font-bold">Page</TableHead>
+                                <TableHead className="font-bold">
+                                    <Button variant="ghost" onClick={() => handleSort('timestamp')} className="-ml-4">
+                                        Submitted
+                                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </TableHead>
+                                <TableHead className="font-bold">
+                                    <Button variant="ghost" onClick={() => handleSort('status')} className="-ml-4">
+                                        Status
+                                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </TableHead>
+                                <TableHead className="text-right pr-4 font-bold">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {paginatedFeedback.length > 0 ? (
+                                paginatedFeedback.map((feedback) => {
+                                    const StatusIcon = statusConfig[feedback.status]?.icon;
+                                    const isExpanded = expandedRowId === feedback.id;
+                                    return (
+                                        <TableRow key={feedback.id}>
+                                            <TableCell>
+                                                <div className="flex items-center gap-3">
+                                                    <Avatar className="h-9 w-9 border">
+                                                        <AvatarFallback>{getInitials(feedback.user)}</AvatarFallback>
+                                                    </Avatar>
+                                                    <div>
+                                                        <p className="font-medium">{feedback.user}</p>
+                                                        <p className="text-xs text-muted-foreground">{feedback.email}</p>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell onClick={() => toggleRowExpansion(feedback.id)} className="cursor-pointer max-w-xs">
+                                                <p className={`text-sm text-muted-foreground whitespace-pre-wrap ${!isExpanded ? 'line-clamp-2' : ''}`}>
+                                                    {feedback.message}
+                                                </p>
+                                            </TableCell>
+                                            <TableCell>
+                                                <code className="text-xs bg-muted px-1 py-0.5 rounded">{feedback.page}</code>
+                                            </TableCell>
+                                            <TableCell className="text-xs text-muted-foreground">{feedback.formattedDate}</TableCell>
+                                            <TableCell>
+                                                <Badge variant={statusConfig[feedback.status]?.variant}>
+                                                    {StatusIcon && <StatusIcon className="mr-1.5 h-3 w-3" />}
+                                                    {statusConfig[feedback.status]?.label}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right pr-4">
+                                                 <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                            <MoreHorizontal className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        {feedback.screenshot && (
+                                                          <Dialog>
+                                                              <DialogTrigger asChild>
+                                                                  <Button variant="ghost" className="w-full justify-start font-normal h-auto py-1.5 px-2 text-sm">
+                                                                    <Paperclip className="mr-2 h-4 w-4" /> View Screenshot
+                                                                  </Button>
+                                                              </DialogTrigger>
+                                                              <DialogContent className="max-w-3xl">
+                                                                  <Image src={feedback.screenshot} alt="Feedback screenshot" width={1280} height={720} className="rounded-md w-full h-auto" data-ai-hint="feedback screenshot" />
+                                                              </DialogContent>
+                                                          </Dialog>
+                                                        )}
+                                                        <DropdownMenuItem onClick={() => handleStatusChange(feedback.id, 'Resolved')}>
+                                                            <CheckCircle className="mr-2 h-4 w-4" />
+                                                            Mark as Resolved
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleStatusChange(feedback.id, 'Pending')}>
+                                                            <Clock className="mr-2 h-4 w-4" />
+                                                            Mark as Pending
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="h-24 text-center">
+                                        No feedback found for the selected filters.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between mt-4">
+                        <span className="text-sm text-muted-foreground">
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                                <span className="sr-only">Previous Page</span>
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                                <span className="sr-only">Next Page</span>
+                            </Button>
                         </div>
-                    )})
-                ) : (
-                    <p className="text-sm text-muted-foreground text-center">No feedback submitted yet.</p>
+                    </div>
                 )}
             </CardContent>
         </Card>
     );
 }
+
+    
+
+    
+

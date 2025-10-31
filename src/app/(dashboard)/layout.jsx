@@ -44,12 +44,17 @@ import { Badge } from "@/components/ui/badge";
 import { FeedbackPopup } from "@/components/feedback/feedback-popup";
 
 const Logo = () => (
-  <div className="flex items-center gap-2">
-    <div className="bg-primary p-2 rounded-lg">
-      <Shield className="h-6 w-6 text-primary-foreground" />
-    </div>
-    <div className="group-data-[collapsible=icon]:hidden">
-        <h1 className="text-xl font-bold">SuperAdmin</h1>
+  <div className="relative flex items-center gap-2 group/logo justify-between w-full">
+    <div className="flex items-center gap-2">
+      <div className="relative bg-primary p-2 rounded-lg">
+        <Shield className="h-6 w-6 text-primary-foreground transition-opacity group-hover/logo:opacity-0" />
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/logo:opacity-100 transition-opacity duration-200">
+          <SidebarTrigger className="h-7 w-7 text-primary-foreground active:text-primary-foreground active:bg-transparent hover:bg-primary/20" />
+        </div>
+      </div>
+      <div className="group-data-[collapsible=icon]:hidden">
+          <h1 className="text-xl font-bold">SuperAdmin</h1>
+      </div>
     </div>
   </div>
 );
@@ -80,7 +85,7 @@ export default function DashboardLayout({ children }) {
   };
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <Sidebar side="left" collapsible="icon" className="border-r border-sidebar-border">
         <SidebarHeader className="flex h-16 items-center p-4">
             <Logo />
@@ -94,7 +99,6 @@ export default function DashboardLayout({ children }) {
                   <SidebarMenuButton
                     isActive={pathname.startsWith(item.href)}
                     tooltip={item.label}
-                    className="justify-start gap-3"
                   >
                     <item.icon />
                     <span>{item.label}</span>
@@ -112,7 +116,6 @@ export default function DashboardLayout({ children }) {
                   <SidebarMenuButton
                     isActive={pathname.startsWith(item.href)}
                     tooltip={item.label}
-                    className="justify-start gap-3"
                   >
                     <item.icon />
                     <span>{item.label}</span>
@@ -123,7 +126,7 @@ export default function DashboardLayout({ children }) {
           </SidebarMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="w-full justify-start gap-2 p-2 h-auto">
+                <Button variant="ghost" className="w-full justify-start gap-2 p-2 h-auto hover:bg-sidebar-accent">
                     <Image src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="user avatar" width={40} height={40} className="rounded-full" data-ai-hint="profile avatar" />
                     <div className="text-left group-data-[collapsible=icon]:hidden">
                         <p className="font-medium text-sm">Super Admin</p>
@@ -153,7 +156,6 @@ export default function DashboardLayout({ children }) {
       </Sidebar>
       <SidebarInset>
         <header className="flex h-16 items-center gap-4 border-b bg-card px-4 lg:px-6 sticky top-0 z-30">
-          <SidebarTrigger className="md:hidden" />
           <h1 className="text-lg font-semibold md:text-xl">
             {getPageTitle()}
           </h1>
@@ -193,3 +195,4 @@ export default function DashboardLayout({ children }) {
     </SidebarProvider>
   );
 }
+
