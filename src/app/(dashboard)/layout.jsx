@@ -99,7 +99,7 @@ export default function DashboardLayout({ children }) {
                   <SidebarMenuButton
                     isActive={pathname.startsWith(item.href)}
                     tooltip={item.label}
-                    className="justify-start gap-3"
+                    className="gap-3"
                   >
                     <item.icon />
                     <span>{item.label}</span>
@@ -117,7 +117,7 @@ export default function DashboardLayout({ children }) {
                   <SidebarMenuButton
                     isActive={pathname.startsWith(item.href)}
                     tooltip={item.label}
-                    className="justify-start gap-3"
+                    className="gap-3"
                   >
                     <item.icon />
                     <span>{item.label}</span>
