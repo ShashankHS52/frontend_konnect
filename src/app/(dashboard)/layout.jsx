@@ -49,7 +49,7 @@ const Logo = () => (
       <div className="relative bg-primary p-2 rounded-lg">
         <Shield className="h-6 w-6 text-primary-foreground transition-opacity group-hover/logo:opacity-0" />
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/logo:opacity-100 transition-opacity duration-200">
-          <SidebarTrigger className="h-7 w-7 text-primary-foreground active:text-primary-foreground active:bg-transparent" />
+          <SidebarTrigger className="h-7 w-7 text-primary-foreground active:text-primary-foreground active:bg-transparent hover:bg-primary/20" />
         </div>
       </div>
       <div className="group-data-[collapsible=icon]:hidden">
@@ -158,7 +158,6 @@ export default function DashboardLayout({ children }) {
       </Sidebar>
       <SidebarInset>
         <header className="flex h-16 items-center gap-4 border-b bg-card px-4 lg:px-6 sticky top-0 z-30">
-          <SidebarTrigger className="group-data-[collapsible=icon]:block hidden md:hidden" />
           <h1 className="text-lg font-semibold md:text-xl">
             {getPageTitle()}
           </h1>
