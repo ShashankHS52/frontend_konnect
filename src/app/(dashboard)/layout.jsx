@@ -126,7 +126,7 @@ export default function DashboardLayout({ children }) {
           </SidebarMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="w-full justify-start gap-2 p-2 h-auto">
+                <Button variant="ghost" className="w-full justify-start gap-2 p-2 h-auto hover:bg-sidebar-accent">
                     <Image src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="user avatar" width={40} height={40} className="rounded-full" data-ai-hint="profile avatar" />
                     <div className="text-left group-data-[collapsible=icon]:hidden">
                         <p className="font-medium text-sm">Super Admin</p>
