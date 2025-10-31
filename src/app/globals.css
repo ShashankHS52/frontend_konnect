@@ -104,3 +104,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+    [data-collapsible=icon] [data-sidebar=menu-button] {
+        justify-content: center;
+    }
+}
