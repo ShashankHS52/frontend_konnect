@@ -44,12 +44,17 @@ import { Badge } from "@/components/ui/badge";
 import { FeedbackPopup } from "@/components/feedback/feedback-popup";
 
 const Logo = () => (
-  <div className="flex items-center gap-2">
-    <div className="bg-primary p-2 rounded-lg">
-      <Shield className="h-6 w-6 text-primary-foreground" />
+  <div className="relative flex items-center gap-2 group/logo">
+    <div className="flex items-center gap-2">
+      <div className="bg-primary p-2 rounded-lg">
+        <Shield className="h-6 w-6 text-primary-foreground" />
+      </div>
+      <div className="group-data-[collapsible=icon]:hidden">
+          <h1 className="text-xl font-bold">SuperAdmin</h1>
+      </div>
     </div>
-    <div className="group-data-[collapsible=icon]:hidden">
-        <h1 className="text-xl font-bold">SuperAdmin</h1>
+    <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover/logo:opacity-100 transition-opacity duration-200 group-data-[collapsible=icon]:hidden">
+      <SidebarTrigger className="h-7 w-7" />
     </div>
   </div>
 );
@@ -153,7 +158,7 @@ export default function DashboardLayout({ children }) {
       </Sidebar>
       <SidebarInset>
         <header className="flex h-16 items-center gap-4 border-b bg-card px-4 lg:px-6 sticky top-0 z-30">
-          <SidebarTrigger />
+          <SidebarTrigger className="group-data-[collapsible=icon]:block hidden md:hidden" />
           <h1 className="text-lg font-semibold md:text-xl">
             {getPageTitle()}
           </h1>
