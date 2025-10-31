@@ -61,6 +61,7 @@ export default function FeedbackPage() {
     const [dateRange, setDateRange] = useState(undefined);
     const [sortConfig, setSortConfig] = useState({ key: 'timestamp', direction: 'desc' });
     const [currentPage, setCurrentPage] = useState(1);
+    const [expandedRowId, setExpandedRowId] = useState(null);
 
 
     const fetchFeedback = async () => {
@@ -92,6 +93,10 @@ export default function FeedbackPage() {
     useEffect(() => {
         fetchFeedback();
     }, []);
+    
+    const toggleRowExpansion = (feedbackId) => {
+        setExpandedRowId(currentId => (currentId === feedbackId ? null : feedbackId));
+    };
 
     const handleStatusChange = async (feedbackId, newStatus) => {
         try {
@@ -321,6 +326,7 @@ export default function FeedbackPage() {
                             {paginatedFeedback.length > 0 ? (
                                 paginatedFeedback.map((feedback) => {
                                     const StatusIcon = statusConfig[feedback.status]?.icon;
+                                    const isExpanded = expandedRowId === feedback.id;
                                     return (
                                         <TableRow key={feedback.id}>
                                             <TableCell>
@@ -334,8 +340,10 @@ export default function FeedbackPage() {
                                                     </div>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>
-                                                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{feedback.message}</p>
+                                            <TableCell onClick={() => toggleRowExpansion(feedback.id)} className="cursor-pointer max-w-xs">
+                                                <p className={`text-sm text-muted-foreground whitespace-pre-wrap ${!isExpanded ? 'line-clamp-2' : ''}`}>
+                                                    {feedback.message}
+                                                </p>
                                             </TableCell>
                                             <TableCell>
                                                 <code className="text-xs bg-muted px-1 py-0.5 rounded">{feedback.page}</code>
@@ -426,3 +434,4 @@ export default function FeedbackPage() {
     
 
     
+
