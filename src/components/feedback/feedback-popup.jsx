@@ -21,6 +21,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 function AddUserDialog({ onUserAdded }) {
     const [name, setName] = useState('');
@@ -239,80 +240,82 @@ export function FeedbackPopup() {
                         We'd love to hear your thoughts. Attach a screenshot if it helps explain the issue.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="feedback-user">User</Label>
-                        <Select
-                            value={selectedUserId}
-                            onValueChange={handleUserSelect}
-                            disabled={isSubmitting}
-                        >
-                            <SelectTrigger id="feedback-user">
-                                <SelectValue placeholder="Select a user..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {users.map(user => (
-                                    <SelectItem key={user._id} value={user._id}>
-                                        {user.name} ({user.email})
-                                    </SelectItem>
-                                ))}
-                                 <AddUserDialog onUserAdded={handleUserAdded} />
-                            </SelectContent>
-                        </Select>
-                    </div>
+                <ScrollArea className="max-h-[70vh] -mx-6">
+                    <div className="grid gap-4 py-4 px-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="feedback-user">User</Label>
+                            <Select
+                                value={selectedUserId}
+                                onValueChange={handleUserSelect}
+                                disabled={isSubmitting}
+                            >
+                                <SelectTrigger id="feedback-user">
+                                    <SelectValue placeholder="Select a user..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {users.map(user => (
+                                        <SelectItem key={user._id} value={user._id}>
+                                            {user.name} ({user.email})
+                                        </SelectItem>
+                                    ))}
+                                    <AddUserDialog onUserAdded={handleUserAdded} />
+                                </SelectContent>
+                            </Select>
+                        </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="feedback-message">Feedback</Label>
-                        <Textarea
-                            id="feedback-message"
-                            placeholder="Type your feedback here..."
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            className="min-h-[100px]"
-                            disabled={isSubmitting}
-                        />
+                        <div className="space-y-2">
+                            <Label htmlFor="feedback-message">Feedback</Label>
+                            <Textarea
+                                id="feedback-message"
+                                placeholder="Type your feedback here..."
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                className="min-h-[100px]"
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="feedback-screenshot">Attach Screenshot</Label>
+                            <Input 
+                                id="feedback-screenshot"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleScreenshotChange}
+                                className="text-sm"
+                                disabled={isSubmitting}
+                            />
+                            {screenshotPreview && (
+                                <div className="mt-2 relative">
+                                    <Image
+                                        src={screenshotPreview}
+                                        alt="Screenshot preview"
+                                        width={400}
+                                        height={225}
+                                        className="rounded-md object-cover w-full h-auto"
+                                        data-ai-hint="feedback screenshot"
+                                    />
+                                    <Button
+                                        variant="destructive"
+                                        size="icon"
+                                        className="absolute top-2 right-2 h-6 w-6"
+                                        onClick={() => {
+                                            setScreenshot(null);
+                                            setScreenshotPreview(null);
+                                            document.getElementById('feedback-screenshot').value = '';
+                                        }}
+                                        disabled={isSubmitting}
+                                    >
+                                        <X className="h-4 w-4" />
+                                        <span className="sr-only">Remove screenshot</span>
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            Submitting from: <code className="bg-muted px-1 py-0.5 rounded">{pathname}</code>
+                        </p>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="feedback-screenshot">Attach Screenshot</Label>
-                        <Input 
-                            id="feedback-screenshot"
-                            type="file"
-                            accept="image/*"
-                            onChange={handleScreenshotChange}
-                            className="text-sm"
-                            disabled={isSubmitting}
-                        />
-                         {screenshotPreview && (
-                            <div className="mt-2 relative">
-                                <Image
-                                    src={screenshotPreview}
-                                    alt="Screenshot preview"
-                                    width={400}
-                                    height={225}
-                                    className="rounded-md object-cover w-full h-auto"
-                                    data-ai-hint="feedback screenshot"
-                                />
-                                <Button
-                                    variant="destructive"
-                                    size="icon"
-                                    className="absolute top-2 right-2 h-6 w-6"
-                                    onClick={() => {
-                                        setScreenshot(null);
-                                        setScreenshotPreview(null);
-                                        document.getElementById('feedback-screenshot').value = '';
-                                    }}
-                                    disabled={isSubmitting}
-                                >
-                                    <X className="h-4 w-4" />
-                                    <span className="sr-only">Remove screenshot</span>
-                                </Button>
-                            </div>
-                        )}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                        Submitting from: <code className="bg-muted px-1 py-0.5 rounded">{pathname}</code>
-                    </p>
-                </div>
+                </ScrollArea>
                 <DialogFooter>
                     <DialogClose asChild>
                         <Button type="button" variant="secondary" disabled={isSubmitting}>
@@ -328,3 +331,5 @@ export function FeedbackPopup() {
         </Dialog>
     );
 }
+
+    
