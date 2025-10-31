@@ -44,17 +44,17 @@ import { Badge } from "@/components/ui/badge";
 import { FeedbackPopup } from "@/components/feedback/feedback-popup";
 
 const Logo = () => (
-  <div className="relative flex items-center gap-2 group/logo">
+  <div className="relative flex items-center gap-2 group/logo justify-between w-full">
     <div className="flex items-center gap-2">
-      <div className="bg-primary p-2 rounded-lg">
-        <Shield className="h-6 w-6 text-primary-foreground" />
+      <div className="relative bg-primary p-2 rounded-lg">
+        <Shield className="h-6 w-6 text-primary-foreground transition-opacity group-hover/logo:opacity-50" />
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/logo:opacity-100 transition-opacity duration-200">
+          <SidebarTrigger className="h-7 w-7 text-primary-foreground" />
+        </div>
       </div>
       <div className="group-data-[collapsible=icon]:hidden">
           <h1 className="text-xl font-bold">SuperAdmin</h1>
       </div>
-    </div>
-    <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover/logo:opacity-100 transition-opacity duration-200 group-data-[collapsible=icon]:hidden">
-      <SidebarTrigger className="h-7 w-7" />
     </div>
   </div>
 );
