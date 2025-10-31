@@ -153,7 +153,7 @@ export default function DashboardLayout({ children }) {
       </Sidebar>
       <SidebarInset>
         <header className="flex h-16 items-center gap-4 border-b bg-card px-4 lg:px-6 sticky top-0 z-30">
-          <SidebarTrigger className="md:hidden" />
+          <SidebarTrigger />
           <h1 className="text-lg font-semibold md:text-xl">
             {getPageTitle()}
           </h1>
