@@ -49,7 +49,7 @@ const Logo = () => (
       <div className="relative bg-primary p-2 rounded-lg">
         <Shield className="h-6 w-6 text-primary-foreground transition-opacity group-hover/logo:opacity-0" />
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/logo:opacity-100 transition-opacity duration-200">
-          <SidebarTrigger className="h-7 w-7 text-primary-foreground active:text-primary-foreground" />
+          <SidebarTrigger className="h-7 w-7 text-primary-foreground active:text-primary-foreground active:bg-transparent" />
         </div>
       </div>
       <div className="group-data-[collapsible=icon]:hidden">
