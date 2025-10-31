@@ -85,7 +85,7 @@ export default function DashboardLayout({ children }) {
   };
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <Sidebar side="left" collapsible="icon" className="border-r border-sidebar-border">
         <SidebarHeader className="flex h-16 items-center p-4">
             <Logo />
